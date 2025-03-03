@@ -33,9 +33,12 @@ public class PlayerUI : MonoBehaviour
         {
             GameObject obj = Instantiate(uiPrefab, uiParent);
             obj.GetComponent<Image>().sprite = sprites[i];
+
+            int index = i;
+
             obj.GetComponent<Button>().onClick.AddListener(() =>
             {
-                PlayerMovement.instance.mouseLook.selectedCube = (short)(i+32);
+                PlayerMovement.instance.mouseLook.selectedCube = (short)(index+32);
                 PlayerMovement.instance.mouseLook.LockMouse();
                 inventoryUI.SetActive(false);
                 inventoryOpen = false;
