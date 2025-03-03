@@ -94,7 +94,7 @@ public class Chunk : MonoBehaviour
             }
         }
 
-        if (WorldGen.instance.type == WorldType.Amplified)
+        if (WorldGen.instance.type == WorldType.Amplified || !LevelController.instance.s_frustumCulling)
         {
             rend.enabled = true;
         }
