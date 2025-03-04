@@ -6,6 +6,8 @@ using System.Collections.Concurrent;
 using System.Threading;
 using UnityEngine;
 using System.Linq;
+using UnityEditor.ShaderKeywordFilter;
+using UnityEngine.UIElements;
 
 public class WorldGen : MonoBehaviour
 {
@@ -24,6 +26,7 @@ public class WorldGen : MonoBehaviour
     public int chunksProcessedPerFrame = 1;
     public int chunkSize = 32;
     public int maxHeight = 10;
+    public int worldMaxHeight = 100;
     public float noiseScale = 0.1f;
     public Transform player;
     public bool debugDraw = false;
@@ -35,6 +38,7 @@ public class WorldGen : MonoBehaviour
 
     private ConcurrentQueue<StagedChunk> stagedChunks = new ConcurrentQueue<StagedChunk>();
     public WorldType type;
+    private Dictionary<string, short> modifiedBlockCopy;
 
     private void OnGUI()
     {
@@ -70,10 +74,12 @@ public class WorldGen : MonoBehaviour
 
     private void Start()
     {
-        seed = float.Parse(r.Next(0, 100000).ToString()) / 1000;
+        modifiedBlockCopy = LevelController.instance.t_worldsave.modifiedBlocks;
+        seed = LevelController.instance.t_worldsave.seed;
+        chunkRendDistance = LevelController.instance.s_rendDist;
         atlasWidth = TextureManager.instance.textureAtlas.width;
         textureAtlas = TextureManager.instance.textures;
-        type = (WorldType)LevelController.instance.w_worldType;
+        type = (WorldType)LevelController.instance.t_worldsave.worldType;
 
         if (type == WorldType.Normal)
         {
@@ -285,8 +291,6 @@ public class WorldGen : MonoBehaviour
         });
     }
 
-    System.Random r = new System.Random();
-
 
     private void ChunkThread(Vector2 chunkPos)
     {
@@ -307,13 +311,34 @@ public class WorldGen : MonoBehaviour
                     {
                         cubes[pos] = dirtBlock;
                     }
-                    else if (y == height-1)
+                    else if (y == height - 1)
                     {
                         cubes[pos] = grassBlock;
                     }
                     else
                     {
                         cubes[pos] = stoneBlock;
+                    }
+                }
+
+                for (int i = 0; i < worldMaxHeight; i++)
+                {
+                    Vector3 pos = new Vector3(x, i, z);
+                    short modifiedBlock = -2;
+                    if (modifiedBlockCopy.ContainsKey(WorldSave.ConvertVectorToString(pos)))
+                    {
+                        modifiedBlock = modifiedBlockCopy[WorldSave.ConvertVectorToString(pos)];
+                    }
+
+                    if (modifiedBlock != -2)
+                    {
+                        if (modifiedBlock == -1)
+                        {
+                            UnityEngine.Debug.Log("skip air block");
+                            continue; // Skip if air (-1)
+                        }
+                        UnityEngine.Debug.Log("modify block " + modifiedBlock);
+                        cubes[pos] = modifiedBlock; // Apply modified block
                     }
                 }
             }

@@ -13,11 +13,18 @@ public class MainMenuUI : MonoBehaviour
     public GameObject singleUI;
     public GameObject multiUI;
     public GameObject optionsUI;
+    public GameObject worldUI;
     [Space]
     public Toggle infiniteToggle;
     public CanvasGroup worldSizeCanvas;
     public Slider worldSize;
     public TMP_Dropdown worldType;
+    [Space]
+    public TMP_Text world0Text;
+    public TMP_Text world1Text;
+    public TMP_Text world2Text;
+    public TMP_Text world3Text;
+    public TMP_Text world4Text;
 
     private void Start()
     {
@@ -25,6 +32,13 @@ public class MainMenuUI : MonoBehaviour
         singleUI.SetActive(false);
         multiUI.SetActive(false);
         optionsUI.SetActive(false);
+        worldUI.SetActive(false);
+
+        world0Text.text = "World 1 " + LevelController.GetMenuFileSize(0);
+        world1Text.text = "World 2 " + LevelController.GetMenuFileSize(1);
+        world2Text.text = "World 3 " + LevelController.GetMenuFileSize(2);
+        world3Text.text = "World 4 " + LevelController.GetMenuFileSize(3);
+        world4Text.text = "World 5 " + LevelController.GetMenuFileSize(4);
 
         infiniteToggle.isOn = LevelController.instance.w_infiniteWorld;
         worldSize.value = LevelController.instance.w_chunkSize;
@@ -48,7 +62,6 @@ public class MainMenuUI : MonoBehaviour
                 clickAudio.Play();
             });
         }
-
     }
 
     public void ExitGame()
@@ -59,9 +72,9 @@ public class MainMenuUI : MonoBehaviour
         #endif
     }
 
-    public void LoadWorld()
+    public void LoadWorld(int index)
     {
-        SceneManager.LoadSceneAsync(1);
+        LevelController.instance.LoadWorld(index);
     }
 
     public void SetWorldType(int value)

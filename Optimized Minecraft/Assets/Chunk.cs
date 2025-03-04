@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
+using UnityEngine.Rendering.PostProcessing;
 
 public class Chunk : MonoBehaviour
 {
@@ -123,6 +124,8 @@ public class Chunk : MonoBehaviour
             // Remove the block
             if (cubes.ContainsKey(blockPos))
             {
+                string pos = WorldSave.ConvertVectorToString(blockPos);
+                LevelController.instance.t_worldsave.modifiedBlocks[pos] = -1;
                 cubes.Remove(blockPos);
                 UpdateChunkMesh();
             }
@@ -134,6 +137,8 @@ public class Chunk : MonoBehaviour
             if (!cubes.ContainsKey(newBlockPos))
             {
                 cubes[newBlockPos] = PlayerMovement.instance.mouseLook.selectedCube;
+                string pos = WorldSave.ConvertVectorToString(newBlockPos);
+                LevelController.instance.t_worldsave.modifiedBlocks[pos] = PlayerMovement.instance.mouseLook.selectedCube;
                 UpdateChunkMesh();
             }
         }

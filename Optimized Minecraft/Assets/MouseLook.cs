@@ -9,10 +9,13 @@ public class MouseLook : MonoBehaviour
     public Transform playerBody;
     float xRotation = 0f;
     Vector3 pos;
+    Camera cam;
 
     // Start is called before the first frame update
     void Start()
     {
+        cam = GetComponent<Camera>();
+        cam.fieldOfView = LevelController.instance.s_fov;
         LockMouse();
     }
 

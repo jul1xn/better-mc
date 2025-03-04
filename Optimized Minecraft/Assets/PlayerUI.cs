@@ -49,7 +49,7 @@ public class PlayerUI : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.T) && !chatOpen)
+        if (Input.GetKeyDown(KeyCode.T) && !chatOpen && !inventoryOpen)
         {
             chatOpen = true;
             inUI = true;
@@ -58,7 +58,7 @@ public class PlayerUI : MonoBehaviour
             chatInputField.gameObject.SetActive(true);
             chatInputField.Select();
         }
-        if (Input.GetKeyDown(KeyCode.E) && !inventoryOpen)
+        if (Input.GetKeyDown(KeyCode.E) && !inventoryOpen && !chatOpen)
         {
             inventoryOpen = true;
             inUI = true;
