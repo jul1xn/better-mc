@@ -106,10 +106,8 @@ public class WorldGen : MonoBehaviour
         }
         lastPlayerChunk = GetChunkCoord(player.position);
 
-        GameObject obj = PlayerMovement.instance.gameObject;
-        obj.GetComponent<PlayerMovement>().enabled = false;
-        obj.transform.position = new Vector3(0, GetGroundAtPos(new Vector2(0, 0)), 0);
-        obj.GetComponent<PlayerMovement>().enabled = true;
+        Vector3 targetPos = new Vector3(0, GetGroundAtPos(new Vector2(0, 0)), 0);
+        PlayerMovement.instance.TeleportToPosition(targetPos);
 
         LoadChunksAroundPlayer();
     }

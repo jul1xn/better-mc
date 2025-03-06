@@ -30,6 +30,13 @@ public class PlayerMovement : MonoBehaviour
         Gizmos.DrawWireSphere(groundCheck.position, groundDistance);
     }
 
+    public void TeleportToPosition(Vector3 targetPosition)
+    {
+        controller.enabled = false;
+        transform.position = targetPosition;
+        controller.enabled = true;
+    }
+
     void Update()
     {
         

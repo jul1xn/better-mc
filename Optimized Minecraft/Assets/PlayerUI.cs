@@ -80,11 +80,8 @@ public class PlayerUI : MonoBehaviour
             string[] msgs = msg.Split(" ");
             if (msgs[0] == "tp")
             {
-                Transform tran = PlayerMovement.instance.transform;
-                tran.GetComponent<PlayerMovement>().enabled = false;
-                tran.GetComponent<PlayerMovement>().velocity = Vector3.zero;
-                tran.position = new Vector3(int.Parse(msgs[1]), int.Parse(msgs[2]), int.Parse(msgs[3]));
-                tran.GetComponent<PlayerMovement>().enabled = true;
+                Vector3 targetPos = new Vector3(int.Parse(msgs[1]), int.Parse(msgs[2]), int.Parse(msgs[3]));
+                PlayerMovement.instance.TeleportToPosition(targetPos);
             }
 
             if (msgs[0] == "debugmode")
