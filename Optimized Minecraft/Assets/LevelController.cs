@@ -72,6 +72,9 @@ public class LevelController : MonoBehaviour
             t_worldsave.worldType = 0;
             t_worldsave.seed = float.Parse(r.Next(0, 100000).ToString()) / 1000;
             t_worldsave.modifiedBlocks = new Dictionary<string, short>();
+
+            Vector3 playerPosition = new Vector3(0, WorldGen.GetNoise(t_worldsave.seed, 0, 0), 0);
+            t_worldsave.playerPosition = WorldSave.ConvertVectorToString(playerPosition);
         }
 
         SceneManager.LoadScene(1);
@@ -81,6 +84,8 @@ public class LevelController : MonoBehaviour
     {
         string fileName = $"\\world_{t_loadedWorldIndex}.save";
         string path = Application.persistentDataPath + fileName;
+
+        t_worldsave.playerPosition = WorldSave.ConvertVectorToString(PlayerMovement.instance.transform.position);
 
         string data = JsonConvert.SerializeObject(t_worldsave);
         File.WriteAllText(path, data);
@@ -133,6 +138,7 @@ public class WorldSave
     public float seed;
     public int worldType;
     public Dictionary<string, short> modifiedBlocks;
+    public string playerPosition;
 
     public static string ConvertVectorToString(Vector3 position)
     {

@@ -106,8 +106,7 @@ public class WorldGen : MonoBehaviour
         }
         lastPlayerChunk = GetChunkCoord(player.position);
 
-        Vector3 targetPos = new Vector3(0, GetGroundAtPos(new Vector2(0, 0)), 0);
-        PlayerMovement.instance.TeleportToPosition(targetPos);
+        PlayerMovement.instance.TeleportToPosition(WorldSave.ConvertStringToVector(LevelController.instance.t_worldsave.playerPosition));
 
         LoadChunksAroundPlayer();
     }
@@ -217,7 +216,7 @@ public class WorldGen : MonoBehaviour
     }
 
 
-    private float GetNoise(float x, float z)
+    public static float GetNoise(float seed, float x, float z)
     {
         float xOffset = seed * 1000;
         float zOffset = seed * 1000;
@@ -298,7 +297,7 @@ public class WorldGen : MonoBehaviour
         {
             for (int z = (int)chunkPos.y; z < chunkPos.y + chunkSize; z++)
             {
-                float noiseValue = GetNoise(x * noiseScale, z * noiseScale);
+                float noiseValue = GetNoise(seed, x * noiseScale, z * noiseScale);
                 int height = Mathf.RoundToInt(noiseValue * maxHeight);
                 int stoneHeight = height / 2;
 
@@ -431,15 +430,6 @@ public class WorldGen : MonoBehaviour
         }
 
         return (vertices.ToArray(), triangles.ToArray(), uvs.ToArray());
-    }
-
-    public float GetGroundAtPos(Vector2 pos)
-    {
-        Vector3 position = new Vector3(pos.x, 1000, pos.y);
-
-        RaycastHit hit;
-        Physics.Raycast(position, Vector3.down, out hit);
-        return hit.point.y;
     }
 }
 
