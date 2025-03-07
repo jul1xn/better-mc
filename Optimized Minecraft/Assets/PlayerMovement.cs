@@ -19,9 +19,16 @@ public class PlayerMovement : MonoBehaviour
     public Vector3 velocity;
     bool isGrounded;
 
+    bool groundGenerated;
+
     private void Awake()
     {
         instance = this;
+    }
+
+    private void Start()
+    {
+        groundGenerated = false;
     }
 
     private void OnDrawGizmos()
@@ -39,7 +46,16 @@ public class PlayerMovement : MonoBehaviour
 
     void Update()
     {
-        
+        if (!groundGenerated)
+        {
+            if (Physics.Raycast(transform.position, Vector3.down))
+            {
+                groundGenerated = true;
+            }
+
+            return;
+        }
+
         isGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask);
 
         if (isGrounded && velocity.y < 0)

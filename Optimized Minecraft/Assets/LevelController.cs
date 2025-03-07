@@ -73,7 +73,10 @@ public class LevelController : MonoBehaviour
             t_worldsave.seed = float.Parse(r.Next(0, 100000).ToString()) / 1000;
             t_worldsave.modifiedBlocks = new Dictionary<string, short>();
 
-            Vector3 playerPosition = new Vector3(0, WorldGen.GetNoise(t_worldsave.seed, 0, 0), 0);
+            float noiseValue = WorldGen.GetNoise(t_worldsave.seed, 0, 0);
+            int height = Mathf.RoundToInt(noiseValue * WorldGen.maxHeight);
+
+            Vector3 playerPosition = new Vector3(0, (height * 2) + 1, 0);
             t_worldsave.playerPosition = WorldSave.ConvertVectorToString(playerPosition);
         }
 

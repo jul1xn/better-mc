@@ -25,7 +25,7 @@ public class WorldGen : MonoBehaviour
     public int chunkRendDistance = 2;
     public int chunksProcessedPerFrame = 1;
     public int chunkSize = 32;
-    public int maxHeight = 10;
+    public static int maxHeight = 10;
     public int worldMaxHeight = 100;
     public float noiseScale = 0.1f;
     public Transform player;
