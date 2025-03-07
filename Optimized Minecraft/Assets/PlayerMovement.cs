@@ -19,7 +19,7 @@ public class PlayerMovement : MonoBehaviour
     public Vector3 velocity;
     bool isGrounded;
 
-    bool groundGenerated;
+    public bool groundGenerated;
 
     private void Awake()
     {

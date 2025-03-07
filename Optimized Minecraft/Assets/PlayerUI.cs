@@ -88,6 +88,11 @@ public class PlayerUI : MonoBehaviour
             {
                 WorldGen.instance.debugDraw = !WorldGen.instance.debugDraw;
             }
+
+            if (msgs[0] == "disablegroundcheck")
+            {
+                PlayerMovement.instance.groundGenerated = true;
+            }
         }
     }
 }
