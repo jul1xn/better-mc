@@ -78,6 +78,7 @@ public class LevelController : MonoBehaviour
 
             Vector3 playerPosition = new Vector3(0, (height * 2) + 1, 0);
             t_worldsave.playerPosition = WorldSave.ConvertVectorToString(playerPosition);
+            t_worldsave.playerRotation = WorldSave.ConvertVectorToString(Vector3.zero);
         }
 
         SceneManager.LoadScene(1);
@@ -89,6 +90,7 @@ public class LevelController : MonoBehaviour
         string path = Application.persistentDataPath + fileName;
 
         t_worldsave.playerPosition = WorldSave.ConvertVectorToString(PlayerMovement.instance.transform.position);
+        t_worldsave.playerRotation = WorldSave.ConvertVectorToString(new Vector3(PlayerMovement.instance.mouseLook.transform.eulerAngles.x, PlayerMovement.instance.transform.eulerAngles.y, 0f));
 
         string data = JsonConvert.SerializeObject(t_worldsave);
         File.WriteAllText(path, data);
@@ -142,6 +144,7 @@ public class WorldSave
     public int worldType;
     public Dictionary<string, short> modifiedBlocks;
     public string playerPosition;
+    public string playerRotation;
 
     public static string ConvertVectorToString(Vector3 position)
     {

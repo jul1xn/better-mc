@@ -107,6 +107,7 @@ public class WorldGen : MonoBehaviour
         lastPlayerChunk = GetChunkCoord(player.position);
 
         PlayerMovement.instance.TeleportToPosition(WorldSave.ConvertStringToVector(LevelController.instance.t_worldsave.playerPosition));
+        PlayerMovement.instance.mouseLook.SetRotation(WorldSave.ConvertStringToVector(LevelController.instance.t_worldsave.playerRotation));
 
         LoadChunksAroundPlayer();
     }

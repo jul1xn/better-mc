@@ -35,6 +35,12 @@ public class MouseLook : MonoBehaviour
         Gizmos.DrawWireSphere(pos, .25f);
     }
 
+    public void SetRotation(Vector3 eulerAngles)
+    {
+        transform.localRotation = Quaternion.Euler(eulerAngles.x, 0f, 0f);
+        playerBody.eulerAngles = Vector3.up * eulerAngles.y;
+    }
+
     // Update is called once per frame
     void Update()
     {
