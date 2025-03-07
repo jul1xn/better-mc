@@ -926,7 +926,7 @@ MonoBehaviour:
     m_Bits: 64
   stopNaNPropagation: 1
   finalBlitToCameraTarget: 0
-  antialiasingMode: 0
+  antialiasingMode: 3
   temporalAntialiasing:
     jitterSpread: 0.75
     sharpness: 0.25
@@ -2015,7 +2015,7 @@ MonoBehaviour:
   chunkRendDistance: 8
   chunksProcessedPerFrame: 1
   chunkSize: 16
-  maxHeight: 20
+  worldMaxHeight: 100
   noiseScale: 0.01
   player: {fileID: 1070714331}
   debugDraw: 1
