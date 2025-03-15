@@ -11,9 +11,13 @@ public class MainMenuUI : MonoBehaviour
     [Space]
     public GameObject mainUI;
     public GameObject singleUI;
-    public GameObject multiUI;
     public GameObject optionsUI;
     public GameObject worldUI;
+    public GameObject multiplayerUI;
+    [Space]
+    public GameObject mpUsernameUI;
+    public GameObject mpConnectUI;
+    public TMP_InputField mpUsernameInputfield;
     [Space]
     public Toggle infiniteToggle;
     public CanvasGroup worldSizeCanvas;
@@ -30,9 +34,9 @@ public class MainMenuUI : MonoBehaviour
     {
         mainUI.SetActive(true);
         singleUI.SetActive(false);
-        multiUI.SetActive(false);
         optionsUI.SetActive(false);
         worldUI.SetActive(false);
+        multiplayerUI.SetActive(false);
 
         world0Text.text = "World 1 " + LevelController.GetMenuFileSize(0);
         world1Text.text = "World 2 " + LevelController.GetMenuFileSize(1);
@@ -62,6 +66,33 @@ public class MainMenuUI : MonoBehaviour
                 clickAudio.Play();
             });
         }
+    }
+
+    public void OpenMultiplayerMenu()
+    {
+        mainUI.SetActive(false);
+        multiplayerUI.SetActive(true);
+        if (PlayerPrefs.GetString("mpUsername", "") == "")
+        {
+            mpUsernameUI.SetActive(true);
+            mpConnectUI.SetActive(false);
+        }
+        else
+        {
+            mpUsernameUI.SetActive(false);
+            mpConnectUI.SetActive(true);
+        }
+    }
+
+    public void MPConfirmUsername()
+    {
+        string username = mpUsernameInputfield.text.Replace(' ', '_');
+        if (!string.IsNullOrEmpty(username))
+        {
+            PlayerPrefs.SetString("mpUsername", username);
+        }
+
+        OpenMultiplayerMenu();
     }
 
     public void ExitGame()
