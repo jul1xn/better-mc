@@ -13,6 +13,7 @@ public class Chunk : MonoBehaviour
     public float destroyDistance;
     Vector3 chunkCenter;
     public Dictionary<Vector3, short> cubes;
+    public string _chunkPos;
 
     Vector3 pos1;
     Vector3 pos2;
@@ -107,6 +108,11 @@ public class Chunk : MonoBehaviour
 
     public void ProcessRayCast(RaycastHit hit, bool isPlacing)
     {
+        if (!LevelController.instance.t_worldsave.modifiedChunks.ContainsKey(_chunkPos))
+        {
+            LevelController.instance.t_worldsave.modifiedChunks[_chunkPos] = new Dictionary<string, short>();
+        }
+
         Vector3 hitPosition = hit.point - hit.normal * 0.1f; // Slight offset to prevent floating point issues
         Vector3 blockPos = new Vector3(Mathf.Floor(hitPosition.x), Mathf.Floor(hitPosition.y), Mathf.Floor(hitPosition.z));
 
@@ -124,8 +130,8 @@ public class Chunk : MonoBehaviour
             // Remove the block
             if (cubes.ContainsKey(blockPos))
             {
-                string pos = WorldSave.ConvertVectorToString(blockPos);
-                LevelController.instance.t_worldsave.modifiedBlocks[pos] = -1;
+                string pos = WorldSave.ConvertVector3ToString(blockPos);
+                LevelController.instance.t_worldsave.modifiedChunks[_chunkPos][pos] = -1;
                 cubes.Remove(blockPos);
                 UpdateChunkMesh();
             }
@@ -137,8 +143,8 @@ public class Chunk : MonoBehaviour
             if (!cubes.ContainsKey(newBlockPos))
             {
                 cubes[newBlockPos] = PlayerMovement.instance.mouseLook.selectedCube;
-                string pos = WorldSave.ConvertVectorToString(newBlockPos);
-                LevelController.instance.t_worldsave.modifiedBlocks[pos] = PlayerMovement.instance.mouseLook.selectedCube;
+                string pos = WorldSave.ConvertVector3ToString(newBlockPos);
+                LevelController.instance.t_worldsave.modifiedChunks[_chunkPos][pos] = PlayerMovement.instance.mouseLook.selectedCube;
                 UpdateChunkMesh();
             }
         }

@@ -71,14 +71,14 @@ public class LevelController : MonoBehaviour
             t_worldsave = new WorldSave();
             t_worldsave.worldType = 0;
             t_worldsave.seed = float.Parse(r.Next(0, 100000).ToString()) / 1000;
-            t_worldsave.modifiedBlocks = new Dictionary<string, short>();
+            t_worldsave.modifiedChunks = new Dictionary<string, Dictionary<string, short>>();
 
             float noiseValue = WorldGen.GetNoise(t_worldsave.seed, 0, 0);
             int height = Mathf.RoundToInt(noiseValue * WorldGen.maxHeight);
 
             Vector3 playerPosition = new Vector3(0, (height * 2) + 1, 0);
-            t_worldsave.playerPosition = WorldSave.ConvertVectorToString(playerPosition);
-            t_worldsave.playerRotation = WorldSave.ConvertVectorToString(Vector3.zero);
+            t_worldsave.playerPosition = WorldSave.ConvertVector3ToString(playerPosition);
+            t_worldsave.playerRotation = WorldSave.ConvertVector3ToString(Vector3.zero);
         }
 
         SceneManager.LoadScene(1);
@@ -89,8 +89,8 @@ public class LevelController : MonoBehaviour
         string fileName = $"\\world_{t_loadedWorldIndex}.save";
         string path = Application.persistentDataPath + fileName;
 
-        t_worldsave.playerPosition = WorldSave.ConvertVectorToString(PlayerMovement.instance.transform.position);
-        t_worldsave.playerRotation = WorldSave.ConvertVectorToString(new Vector3(PlayerMovement.instance.mouseLook.transform.eulerAngles.x, PlayerMovement.instance.transform.eulerAngles.y, 0f));
+        t_worldsave.playerPosition = WorldSave.ConvertVector3ToString(PlayerMovement.instance.transform.position);
+        t_worldsave.playerRotation = WorldSave.ConvertVector3ToString(new Vector3(PlayerMovement.instance.mouseLook.transform.eulerAngles.x, PlayerMovement.instance.transform.eulerAngles.y, 0f));
 
         string data = JsonConvert.SerializeObject(t_worldsave);
         File.WriteAllText(path, data);
@@ -107,17 +107,6 @@ public class LevelController : MonoBehaviour
         {
             return "OFF";
         }
-    }
-
-    public short IsBlockModified(Vector3 position)
-    {
-        string pos = WorldSave.ConvertVectorToString(position);
-        if (t_worldsave.modifiedBlocks.ContainsKey(pos))
-        {
-            return t_worldsave.modifiedBlocks[pos];
-        }
-
-        return -2;
     }
 
     public static string GetMenuFileSize(int index)
@@ -142,18 +131,29 @@ public class WorldSave
 {
     public float seed;
     public int worldType;
-    public Dictionary<string, short> modifiedBlocks;
+    public Dictionary<string, Dictionary<string, short>> modifiedChunks;
     public string playerPosition;
     public string playerRotation;
 
-    public static string ConvertVectorToString(Vector3 position)
+    public static string ConvertVector2ToString(Vector2 position)
+    {
+        return $"{position.x};{position.y}";
+    }
+
+    public static string ConvertVector3ToString(Vector3 position)
     {
         return $"{position.x};{position.y};{position.z}";
     }
 
-    public static Vector3 ConvertStringToVector(string value)
+    public static Vector3 ConvertStringToVector3(string value)
     {
         string[] lines = value.Split(';');
         return new Vector3(float.Parse(lines[0]), float.Parse(lines[1]), float.Parse(lines[2]));
+    }
+
+    public static Vector2 ConvertStringToVector2(string value)
+    {
+        string[] lines = value.Split(';');
+        return new Vector2(float.Parse(lines[0]), float.Parse(lines[1]));
     }
 }

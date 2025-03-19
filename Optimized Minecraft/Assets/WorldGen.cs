@@ -38,7 +38,7 @@ public class WorldGen : MonoBehaviour
 
     private ConcurrentQueue<StagedChunk> stagedChunks = new ConcurrentQueue<StagedChunk>();
     public WorldType type;
-    private Dictionary<string, short> modifiedBlockCopy;
+    private Dictionary<string, Dictionary<string, short>> modifiedBlockCopy;
 
     private void OnGUI()
     {
@@ -74,7 +74,7 @@ public class WorldGen : MonoBehaviour
 
     private void Start()
     {
-        modifiedBlockCopy = LevelController.instance.t_worldsave.modifiedBlocks;
+        modifiedBlockCopy = LevelController.instance.t_worldsave.modifiedChunks;
         seed = LevelController.instance.t_worldsave.seed;
         chunkRendDistance = LevelController.instance.s_rendDist;
         atlasWidth = TextureManager.instance.textureAtlas.width;
@@ -106,8 +106,8 @@ public class WorldGen : MonoBehaviour
         }
         lastPlayerChunk = GetChunkCoord(player.position);
 
-        PlayerMovement.instance.TeleportToPosition(WorldSave.ConvertStringToVector(LevelController.instance.t_worldsave.playerPosition));
-        PlayerMovement.instance.mouseLook.SetRotation(WorldSave.ConvertStringToVector(LevelController.instance.t_worldsave.playerRotation));
+        PlayerMovement.instance.TeleportToPosition(WorldSave.ConvertStringToVector3(LevelController.instance.t_worldsave.playerPosition));
+        PlayerMovement.instance.mouseLook.SetRotation(WorldSave.ConvertStringToVector3(LevelController.instance.t_worldsave.playerRotation));
 
         LoadChunksAroundPlayer();
     }
@@ -242,6 +242,7 @@ public class WorldGen : MonoBehaviour
                 chunk.layer = gameObject.layer;
                 Chunk c = chunk.AddComponent<Chunk>();
                 c.cubes = stagedChunk.cubePositions;
+                c._chunkPos = WorldSave.ConvertVector2ToString(stagedChunk.chunkPosition);
 
                 Mesh mesh = new Mesh();
                 mesh.vertices = stagedChunk.vertices;
@@ -319,24 +320,28 @@ public class WorldGen : MonoBehaviour
                     }
                 }
 
-                for (int i = 0; i < worldMaxHeight; i++)
+                if (modifiedBlockCopy.ContainsKey(WorldSave.ConvertVector2ToString(chunkPos)))
                 {
-                    Vector3 pos = new Vector3(x, i, z);
-                    short modifiedBlock = -2;
-                    if (modifiedBlockCopy.ContainsKey(WorldSave.ConvertVectorToString(pos)))
+                    Dictionary<string, short> keyValues = modifiedBlockCopy[WorldSave.ConvertVector2ToString(chunkPos)];
+                    for (int i = 0; i < worldMaxHeight; i++)
                     {
-                        modifiedBlock = modifiedBlockCopy[WorldSave.ConvertVectorToString(pos)];
-                    }
-
-                    if (modifiedBlock != -2)
-                    {
-                        if (modifiedBlock == -1)
+                        Vector3 pos = new Vector3(x, i, z);
+                        short modifiedBlock = -2;
+                        if (keyValues.ContainsKey(WorldSave.ConvertVector3ToString(pos)))
                         {
-                            UnityEngine.Debug.Log("skip air block");
-                            continue; // Skip if air (-1)
+                            modifiedBlock = keyValues[WorldSave.ConvertVector3ToString(pos)];
                         }
-                        UnityEngine.Debug.Log("modify block " + modifiedBlock);
-                        cubes[pos] = modifiedBlock; // Apply modified block
+
+                        if (modifiedBlock != -2)
+                        {
+                            if (modifiedBlock == -1)
+                            {
+                                UnityEngine.Debug.Log("skip air block");
+                                continue; // Skip if air (-1)
+                            }
+                            UnityEngine.Debug.Log("modify block " + modifiedBlock);
+                            cubes[pos] = modifiedBlock; // Apply modified block
+                        }
                     }
                 }
             }
