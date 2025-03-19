@@ -237,6 +237,12 @@ public class WorldGen : MonoBehaviour
             int processed = 0;
             while (processed < chunksProcessedPerFrame && stagedChunks.TryDequeue(out StagedChunk stagedChunk))
             {
+                if (loadedChunks.ContainsKey(stagedChunk.chunkPosition))
+                {
+                    UnityEngine.Debug.LogWarning($"Chunk {stagedChunk.chunkPosition} is already loaded, skipping generation.");
+                    return;
+                }
+
                 GameObject chunk = new GameObject($"{stagedChunk.chunkPosition.x};{stagedChunk.chunkPosition.y}");
                 chunk.transform.parent = transform;
                 chunk.layer = gameObject.layer;
@@ -282,11 +288,17 @@ public class WorldGen : MonoBehaviour
 
     private void GenerateChunk(Vector2 chunkPos)
     {
-        Interlocked.Increment(ref activeThreads); // Safely increment active thread count
+        if (loadedChunks.ContainsKey(chunkPos))
+        {
+            UnityEngine.Debug.LogWarning($"Chunk {chunkPos} is already loaded, skipping generation.");
+            return;
+        }
+
+        Interlocked.Increment(ref activeThreads);
         ThreadPool.QueueUserWorkItem(state =>
         {
             ChunkThread(chunkPos);
-            Interlocked.Decrement(ref activeThreads); // Safely decrement when done
+            Interlocked.Decrement(ref activeThreads);
         });
     }
 
@@ -294,6 +306,7 @@ public class WorldGen : MonoBehaviour
     private void ChunkThread(Vector2 chunkPos)
     {
         Dictionary<Vector3, short> cubes = new Dictionary<Vector3, short>();
+        string chunkKey = WorldSave.ConvertVector2ToString(chunkPos);
 
         for (int x = (int)chunkPos.x; x < chunkPos.x + chunkSize; x++)
         {
@@ -320,27 +333,18 @@ public class WorldGen : MonoBehaviour
                     }
                 }
 
-                if (modifiedBlockCopy.ContainsKey(WorldSave.ConvertVector2ToString(chunkPos)))
+                if (modifiedBlockCopy.TryGetValue(chunkKey, out var modifications))
                 {
-                    Dictionary<string, short> keyValues = modifiedBlockCopy[WorldSave.ConvertVector2ToString(chunkPos)];
-                    for (int i = 0; i < worldMaxHeight; i++)
-                    {
-                        Vector3 pos = new Vector3(x, i, z);
-                        short modifiedBlock = -2;
-                        if (keyValues.ContainsKey(WorldSave.ConvertVector3ToString(pos)))
-                        {
-                            modifiedBlock = keyValues[WorldSave.ConvertVector3ToString(pos)];
-                        }
+                    // Create a local copy to avoid concurrent modification issues
+                    var localCopy = new Dictionary<string, short>(modifications);
 
-                        if (modifiedBlock != -2)
+                    foreach (var kvp in localCopy)
+                    {
+                        UnityEngine.Debug.Log(kvp.Key);
+                        Vector3 pos = WorldSave.ConvertStringToVector3(kvp.Key);
+                        if (cubes.ContainsKey(pos) || kvp.Value != -1)
                         {
-                            if (modifiedBlock == -1)
-                            {
-                                UnityEngine.Debug.Log("skip air block");
-                                continue; // Skip if air (-1)
-                            }
-                            UnityEngine.Debug.Log("modify block " + modifiedBlock);
-                            cubes[pos] = modifiedBlock; // Apply modified block
+                            cubes[pos] = kvp.Value;
                         }
                     }
                 }
@@ -365,7 +369,6 @@ public class WorldGen : MonoBehaviour
         chunk.chunkPosition = chunkPos;
         chunk.cubePositions = cubes;
         stagedChunks.Enqueue(chunk);
-
     }
 
 
