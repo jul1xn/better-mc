@@ -305,9 +305,11 @@ public class WorldGen : MonoBehaviour
 
     private void ChunkThread(Vector2 chunkPos)
     {
+        Log($"[ChunkThread] Starting chunk generation at {chunkPos}");
         Dictionary<Vector3, short> cubes = new Dictionary<Vector3, short>();
         string chunkKey = WorldSave.ConvertVector2ToString(chunkPos);
 
+        Log($"[ChunkThread] Calculating terrain height for chunk {chunkPos}");
         for (int x = (int)chunkPos.x; x < chunkPos.x + chunkSize; x++)
         {
             for (int z = (int)chunkPos.y; z < chunkPos.y + chunkSize; z++)
@@ -315,6 +317,8 @@ public class WorldGen : MonoBehaviour
                 float noiseValue = GetNoise(seed, x * noiseScale, z * noiseScale);
                 int height = Mathf.RoundToInt(noiseValue * maxHeight);
                 int stoneHeight = height / 2;
+
+                Log($"[ChunkThread] Noise at ({x}, {z}): {noiseValue}, height: {height}, stoneHeight: {stoneHeight}");
 
                 for (int y = 0; y < height; y++)
                 {
@@ -332,43 +336,49 @@ public class WorldGen : MonoBehaviour
                         cubes[pos] = stoneBlock;
                     }
                 }
+            }
+        }
 
-                if (modifiedBlockCopy.TryGetValue(chunkKey, out var modifications))
+        if (modifiedBlockCopy.TryGetValue(chunkKey, out var modifications))
+        {
+            Log($"[ChunkThread] Chunk {chunkPos} is modified");
+            var localCopy = new Dictionary<string, short>(modifications);
+            Log($"[ChunkThread] Modified block count: {localCopy.Count}");
+
+            foreach (var kvp in localCopy)
+            {
+                Vector3 pos = WorldSave.ConvertStringToVector3(kvp.Key);
+                Log($"[ChunkThread] Modifying block at {pos} to {kvp.Value}");
+                if (cubes.ContainsKey(pos) || kvp.Value != -1)
                 {
-                    // Create a local copy to avoid concurrent modification issues
-                    var localCopy = new Dictionary<string, short>(modifications);
-
-                    foreach (var kvp in localCopy)
-                    {
-                        UnityEngine.Debug.Log(kvp.Key);
-                        Vector3 pos = WorldSave.ConvertStringToVector3(kvp.Key);
-                        if (cubes.ContainsKey(pos) || kvp.Value != -1)
-                        {
-                            cubes[pos] = kvp.Value;
-                        }
-                    }
+                    cubes[pos] = kvp.Value;
                 }
             }
         }
-        
+
+        Log($"[ChunkThread] Starting face detection for chunk {chunkPos}");
         List<(Vector3, Quaternion, int, Vector2, Vector2)> faceData = new List<(Vector3, Quaternion, int, Vector2, Vector2)>();
         HashSet<Vector3> cubeSet = new HashSet<Vector3>(cubes.Keys);
-
+         
         foreach (Vector3 cube in cubes.Keys)
         {
             CheckFaces(cube, faceData, cubeSet, cubes[cube]);
         }
+        Log($"[ChunkThread] Face detection complete. Total faces: {faceData.Count}");
 
-        
+        Log($"[ChunkThread] Generating mesh data for chunk {chunkPos}");
         (Vector3[], int[], Vector2[]) meshData = GenerateChunkCollider(faceData);
-        
+        Log($"[ChunkThread] Mesh data generated: Vertices: {meshData.Item1.Length}, Triangles: {meshData.Item2.Length}, UVs: {meshData.Item3.Length}");
+
         StagedChunk chunk = new StagedChunk();
         chunk.vertices = meshData.Item1;
         chunk.triangles = meshData.Item2;
         chunk.uvs = meshData.Item3;
         chunk.chunkPosition = chunkPos;
         chunk.cubePositions = cubes;
+
         stagedChunks.Enqueue(chunk);
+        Log($"[ChunkThread] Chunk {chunkPos} enqueued for rendering");
     }
 
 
@@ -439,6 +449,11 @@ public class WorldGen : MonoBehaviour
         }
 
         return (vertices.ToArray(), triangles.ToArray(), uvs.ToArray());
+    }
+
+    public void Log(string msg)
+    {
+        UnityEngine.Debug.Log("[WorldGen] " + msg);
     }
 }
 

@@ -1,4 +1,5 @@
 using System.IO;
+using System.Text.RegularExpressions;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
@@ -22,13 +23,36 @@ public class LevelController : MonoBehaviour
     public int s_rendDist;
     public float s_fov;
     [Space]
-    public int t_loadedWorldIndex;
+    public string t_loadedWorldName;
     public WorldSave t_worldsave;
+
+    public static Texture2D CaptureScreenshot64x64()
+    {
+        // Create a 64x64 RenderTexture
+        RenderTexture rt = new RenderTexture(64, 64, 24);
+        Texture2D screenshot = new Texture2D(64, 64, TextureFormat.RGB24, false);
+
+        // Render the screen to the texture
+        Camera.main.targetTexture = rt;
+        Camera.main.Render();
+        RenderTexture.active = rt;
+
+        // Read the pixels into the Texture2D
+        screenshot.ReadPixels(new Rect(0, 0, 64, 64), 0, 0);
+        screenshot.Apply();
+
+        // Clean up
+        Camera.main.targetTexture = null;
+        RenderTexture.active = null;
+        UnityEngine.Object.Destroy(rt);
+
+        return screenshot;
+    }
 
     private void Awake()
     {
         instance = this;
-        t_loadedWorldIndex = 0;
+
         DontDestroyOnLoad(gameObject);
 
         w_infiniteWorld = bool.Parse(PlayerPrefs.GetString("w_infiniteWorld", "false"));
@@ -37,6 +61,8 @@ public class LevelController : MonoBehaviour
         s_fov = PlayerPrefs.GetFloat("s_fov", 60);
         w_worldType = PlayerPrefs.GetInt("w_worldType", 0);
         s_rendDist = PlayerPrefs.GetInt("s_rendDist", 8);
+
+        Debug.Log(Application.persistentDataPath);
     }
 
     private void OnApplicationQuit()
@@ -56,10 +82,10 @@ public class LevelController : MonoBehaviour
 
     System.Random r = new System.Random();
 
-    public void LoadWorld(int index)
+    public void LoadWorld(string name)
     {
-        t_loadedWorldIndex = index;
-        string fileName = $"\\world_{index}.save";
+        t_loadedWorldName = WorldSave.ConvertToValidFilename(name);
+        string fileName = $"\\{t_loadedWorldName}.save";
         string path = Application.persistentDataPath + fileName;
 
         if (File.Exists(path))
@@ -69,6 +95,7 @@ public class LevelController : MonoBehaviour
         else
         {
             t_worldsave = new WorldSave();
+            t_worldsave.worldName = name;
             t_worldsave.worldType = 0;
             t_worldsave.seed = float.Parse(r.Next(0, 100000).ToString()) / 1000;
             t_worldsave.modifiedChunks = new Dictionary<string, Dictionary<string, short>>();
@@ -86,32 +113,21 @@ public class LevelController : MonoBehaviour
 
     public void SaveWorld()
     {
-        string fileName = $"\\world_{t_loadedWorldIndex}.save";
+        string fileName = $"\\{t_loadedWorldName}.save";
         string path = Application.persistentDataPath + fileName;
 
         t_worldsave.playerPosition = WorldSave.ConvertVector3ToString(PlayerMovement.instance.transform.position);
         t_worldsave.playerRotation = WorldSave.ConvertVector3ToString(new Vector3(PlayerMovement.instance.mouseLook.transform.eulerAngles.x, PlayerMovement.instance.transform.eulerAngles.y, 0f));
+        t_worldsave.image = WorldSave.Texture2DToByteString(CaptureScreenshot64x64());
 
         string data = JsonConvert.SerializeObject(t_worldsave);
         File.WriteAllText(path, data);
-        Debug.Log($"World {t_loadedWorldIndex} at {path}");
+        Debug.Log($"World {t_loadedWorldName} at {path}");
     }
 
-    public static string GetBoolText(bool value)
+    public static string GetMenuFileSize(string name)
     {
-        if (value)
-        {
-            return "ON";
-        }
-        else
-        {
-            return "OFF";
-        }
-    }
-
-    public static string GetMenuFileSize(int index)
-    {
-        string fileName = $"\\world_{index}.save";
+        string fileName = $"\\{WorldSave.ConvertToValidFilename(name)}.save";
         string path = Application.persistentDataPath + fileName;
         if (File.Exists(path))
         {
@@ -129,11 +145,58 @@ public class LevelController : MonoBehaviour
 [Serializable]
 public class WorldSave
 {
+    public string worldName;
+    public string image;
     public float seed;
     public int worldType;
     public Dictionary<string, Dictionary<string, short>> modifiedChunks;
     public string playerPosition;
     public string playerRotation;
+
+    public static string GetBoolText(bool value)
+    {
+        if (value)
+        {
+            return "ON";
+        }
+        else
+        {
+            return "OFF";
+        }
+    }
+
+    public static string ConvertToValidFilename(string input)
+    {
+        if (string.IsNullOrWhiteSpace(input))
+        {
+            return "";
+        }
+
+        input = input.ToLower();
+        input = input.Replace(' ', '_');
+        input = Regex.Replace(input, @"[^a-z0-9_]", "");
+        input = input.Trim('_');
+
+        return input;
+    }
+
+    public static string Texture2DToByteString(Texture2D texture)
+    {
+        if (texture == null) return null;
+
+        byte[] textureBytes = texture.EncodeToPNG();
+        return Convert.ToBase64String(textureBytes);
+    }
+
+    public static Texture2D ByteStringToTexture2D(string base64String)
+    {
+        if (string.IsNullOrEmpty(base64String)) return null;
+
+        byte[] textureBytes = Convert.FromBase64String(base64String);
+        Texture2D texture = new Texture2D(2, 2);
+        texture.LoadImage(textureBytes);
+        return texture;
+    }
 
     public static string ConvertVector2ToString(Vector2 position)
     {

@@ -1,4 +1,5 @@
 using System.Collections;
+using System.IO;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -14,6 +15,7 @@ public class MainMenuUI : MonoBehaviour
     public GameObject optionsUI;
     public GameObject worldUI;
     public GameObject multiplayerUI;
+    public GameObject createWorldUI;
     [Space]
     public GameObject mpUsernameUI;
     public GameObject mpConnectUI;
@@ -24,11 +26,9 @@ public class MainMenuUI : MonoBehaviour
     public Slider worldSize;
     public TMP_Dropdown worldType;
     [Space]
-    public TMP_Text world0Text;
-    public TMP_Text world1Text;
-    public TMP_Text world2Text;
-    public TMP_Text world3Text;
-    public TMP_Text world4Text;
+    public TMP_InputField worldName;
+    public GameObject worldPrefab;
+    public Transform worldParent;
 
     private void Start()
     {
@@ -37,12 +37,7 @@ public class MainMenuUI : MonoBehaviour
         optionsUI.SetActive(false);
         worldUI.SetActive(false);
         multiplayerUI.SetActive(false);
-
-        world0Text.text = "World 1 " + LevelController.GetMenuFileSize(0);
-        world1Text.text = "World 2 " + LevelController.GetMenuFileSize(1);
-        world2Text.text = "World 3 " + LevelController.GetMenuFileSize(2);
-        world3Text.text = "World 4 " + LevelController.GetMenuFileSize(3);
-        world4Text.text = "World 5 " + LevelController.GetMenuFileSize(4);
+        createWorldUI.SetActive(false);
 
         infiniteToggle.isOn = LevelController.instance.w_infiniteWorld;
         worldSize.value = LevelController.instance.w_chunkSize;
@@ -59,12 +54,24 @@ public class MainMenuUI : MonoBehaviour
             worldSizeCanvas.alpha = 0.5f;
         }
 
+        LoadWorlds();
+
         foreach (Button btn in Resources.FindObjectsOfTypeAll<Button>())
         {
             btn.onClick.AddListener(() =>
             {
                 clickAudio.Play();
             });
+        }
+    }
+
+    public void LoadWorlds()
+    {
+        DirectoryInfo d = new DirectoryInfo(Application.persistentDataPath);
+        foreach(var file in d.GetFiles("*.save"))
+        {
+            GameObject obj = Instantiate(worldPrefab, worldParent);
+            obj.GetComponent<World>().Init(file.Name);
         }
     }
 
@@ -103,9 +110,12 @@ public class MainMenuUI : MonoBehaviour
         #endif
     }
 
-    public void LoadWorld(int index)
+    public void CreateWorld()
     {
-        LevelController.instance.LoadWorld(index);
+        if (!string.IsNullOrWhiteSpace(worldName.text))
+        {
+            LevelController.instance.LoadWorld(worldName.text);
+        }
     }
 
     public void SetWorldType(int value)
