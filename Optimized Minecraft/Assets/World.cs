@@ -19,11 +19,11 @@ public class World : MonoBehaviour
         string fileName = $"\\{_worldname}";
         string path = Application.persistentDataPath + fileName;
         save = JsonConvert.DeserializeObject<WorldSave>(File.ReadAllText(path));
+        worldName.text = save.worldName;
 
         Texture2D tex = WorldSave.ByteStringToTexture2D(save.image);
         tex.filterMode = FilterMode.Point;
         previewImage.texture = tex;
-        worldName.text = save.worldName;
     }
 
     public void Load()

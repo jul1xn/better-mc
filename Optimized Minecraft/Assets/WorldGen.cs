@@ -349,9 +349,14 @@ public class WorldGen : MonoBehaviour
             {
                 Vector3 pos = WorldSave.ConvertStringToVector3(kvp.Key);
                 Log($"[ChunkThread] Modifying block at {pos} to {kvp.Value}");
-                if (cubes.ContainsKey(pos) || kvp.Value != -1)
+                if (kvp.Value == -1)
                 {
-                    cubes[pos] = kvp.Value;
+                    // Remove the block (set to air)
+                    cubes.Remove(pos);
+                }
+                else
+                {
+                    cubes[pos] = kvp.Value; // Replace or add the block
                 }
             }
         }
