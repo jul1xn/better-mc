@@ -7679,7 +7679,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   blockPath: Blocks/
+  structurePath: Structures/
   allBlocks: []
+  allStructures: []
 --- !u!1 &1605812694
 GameObject:
   m_ObjectHideFlags: 0

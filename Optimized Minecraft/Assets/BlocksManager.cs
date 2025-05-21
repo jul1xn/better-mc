@@ -6,7 +6,9 @@ using UnityEngine;
 public class BlocksManager : MonoBehaviour
 {
     public string blockPath;
+    public string structurePath;
     public Block[] allBlocks;
+    public Structure[] allStructures;
     public static BlocksManager Instance;
 
     private void Awake()
@@ -23,6 +25,7 @@ public class BlocksManager : MonoBehaviour
     public void Start()
     {
         allBlocks = Resources.LoadAll<Block>(blockPath);
+        allStructures = Resources.LoadAll<Structure>(structurePath);
     }
 
     public short GetBlockByName(string name)

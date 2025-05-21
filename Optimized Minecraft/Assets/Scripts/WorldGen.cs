@@ -30,6 +30,7 @@ public class WorldGen : MonoBehaviour
     public float noiseScale = 0.1f;
     public Transform player;
     public bool debugDraw = false;
+    System.Random randomNumber = new System.Random();
 
     private Dictionary<Vector2, GameObject> loadedChunks = new Dictionary<Vector2, GameObject>();
     private Vector2 lastPlayerChunk;
@@ -336,6 +337,19 @@ public class WorldGen : MonoBehaviour
                         cubes[pos] = dirtBlock;
                     }
                 }
+
+                System.Random rng = new System.Random((int)(seed + x * 73856093 + z * 19349663)); // Unique seed per chunk
+                foreach(Structure s in BlocksManager.Instance.allStructures)
+                {
+                    if (rng.Next(s.commonness) == 0)
+                    {
+                        Vector3 basePos = new Vector3(x, height, z);
+                        foreach (StructureBlock block in s.blocks)
+                        {
+                            cubes[basePos + block.relativePosition] = block.blockId;
+                        }
+                    }
+                }
             }
         }
 
@@ -360,6 +374,8 @@ public class WorldGen : MonoBehaviour
                 }
             }
         }
+
+
 
         Log($"[ChunkThread] Starting face detection for chunk {chunkPos}");
         List<(Vector3, Quaternion, int, Vector2, Vector2)> faceData = new List<(Vector3, Quaternion, int, Vector2, Vector2)>();
