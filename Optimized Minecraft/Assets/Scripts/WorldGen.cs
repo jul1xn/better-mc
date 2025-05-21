@@ -13,6 +13,7 @@ public class WorldGen : MonoBehaviour
 {
     public static WorldGen instance;
     public GameObject cubePrefab;
+    public GameObject lightPrefab;
     public Material sharedMaterial;
     [Header("World settings")]
     public float seed;
@@ -32,25 +33,14 @@ public class WorldGen : MonoBehaviour
     public bool debugDraw = false;
     System.Random randomNumber = new System.Random();
 
-    private Dictionary<Vector2, GameObject> loadedChunks = new Dictionary<Vector2, GameObject>();
+    public Dictionary<Vector2, GameObject> loadedChunks = new Dictionary<Vector2, GameObject>();
     private Vector2 lastPlayerChunk;
     private int atlasWidth;
     public Dictionary<short, Vector2> textureAtlas = new Dictionary<short, Vector2>();
 
-    private ConcurrentQueue<StagedChunk> stagedChunks = new ConcurrentQueue<StagedChunk>();
+    public ConcurrentQueue<StagedChunk> stagedChunks = new ConcurrentQueue<StagedChunk>();
     public WorldType type;
     private Dictionary<string, Dictionary<string, short>> modifiedBlockCopy;
-
-    private void OnGUI()
-    {
-        if (debugDraw)
-        {
-            GUILayout.Label($"Loaded chunks: {loadedChunks.Count}");
-            GUILayout.Label($"Child count: {transform.childCount}");
-            GUILayout.Label($"Staged chunks: {stagedChunks.Count}");
-            GUILayout.Label($"Active threads: {activeThreads}");
-        }
-    }
 
     private void OnDrawGizmos()
     {
@@ -257,6 +247,7 @@ public class WorldGen : MonoBehaviour
                 mesh.uv = stagedChunk.uvs;
                 mesh.RecalculateNormals();
 
+
                 MeshCollider meshCollider = chunk.GetComponent<MeshCollider>();
                 if (meshCollider == null)
                 {
@@ -276,6 +267,13 @@ public class WorldGen : MonoBehaviour
                     rend.material = sharedMaterial;
                 }
 
+                foreach(var kvp in stagedChunk.lightLevels)
+                {
+                    Light l = Instantiate(lightPrefab, kvp.Key, Quaternion.identity).GetComponent<Light>();
+                    l.transform.parent = chunk.transform;
+                }
+
+
                 meshFilter.sharedMesh = mesh;
                 meshCollider.sharedMesh = mesh;
                 loadedChunks[stagedChunk.chunkPosition] = chunk;
@@ -284,7 +282,7 @@ public class WorldGen : MonoBehaviour
         }
     }
 
-    private int activeThreads = 0;
+    public int activeThreads = 0;
     public int maxConcurrentThreads = 2; // Tune this number based on performance
 
     private void GenerateChunk(Vector2 chunkPos)
@@ -346,7 +344,15 @@ public class WorldGen : MonoBehaviour
                         Vector3 basePos = new Vector3(x, height, z);
                         foreach (StructureBlock block in s.blocks)
                         {
-                            cubes[basePos + block.relativePosition] = block.blockId;
+                            Vector3 targetPos = basePos + block.relativePosition;
+
+                            //if (targetPos.x < chunkPos.x || targetPos.x >= chunkPos.x + chunkSize ||
+                            //    targetPos.z < chunkPos.y || targetPos.z >= chunkPos.y + chunkSize)
+                            //{
+                            //    continue;
+                            //}
+
+                            cubes[targetPos] = block.blockId;
                         }
                     }
                 }
@@ -391,7 +397,19 @@ public class WorldGen : MonoBehaviour
         (Vector3[], int[], Vector2[]) meshData = GenerateChunkCollider(faceData);
         Log($"[ChunkThread] Mesh data generated: Vertices: {meshData.Item1.Length}, Triangles: {meshData.Item2.Length}, UVs: {meshData.Item3.Length}");
 
+        Dictionary<Vector3, byte> lightLevels = new Dictionary<Vector3, byte>();
+        foreach(var kvp in cubes)
+        {
+            byte lightLevel = BlocksManager.Instance.GetLightLevel((int)kvp.Value);
+            if (lightLevel != 0)
+            {
+                lightLevels[kvp.Key] = lightLevel;
+            }
+        }
+
+
         StagedChunk chunk = new StagedChunk();
+        chunk.lightLevels = lightLevels;
         chunk.vertices = meshData.Item1;
         chunk.triangles = meshData.Item2;
         chunk.uvs = meshData.Item3;
@@ -405,32 +423,29 @@ public class WorldGen : MonoBehaviour
 
     public void CheckFaces(Vector3 cubePosition, List<(Vector3, Quaternion, int, Vector2, Vector2)> faceData, HashSet<Vector3> cubes, short blockId)
     {
-        var block = BlocksManager.Instance.allBlocks[blockId];
+        Block block = BlocksManager.Instance.allBlocks[blockId];
 
-        // Direction + rotation + face name
         (Vector3 direction, Quaternion rotation, string face)[] checks =
-        {
-        (Vector3.forward, Quaternion.identity, "front"),
-        (Vector3.back, Quaternion.Euler(0, 180, 0), "back"),
-        (Vector3.right, Quaternion.Euler(0, 90, 0), "right"),
-        (Vector3.left, Quaternion.Euler(0, -90, 0), "left"),
-        (Vector3.down, Quaternion.Euler(90, 0, 0), "bottom"),
-        (Vector3.up, Quaternion.Euler(-90, 0, 0), "top")
-    };
+            {
+            (Vector3.forward, Quaternion.identity, "front"),
+            (Vector3.back, Quaternion.Euler(0, 180, 0), "back"),
+            (Vector3.right, Quaternion.Euler(0, 90, 0), "right"),
+            (Vector3.left, Quaternion.Euler(0, -90, 0), "left"),
+            (Vector3.down, Quaternion.Euler(90, 0, 0), "bottom"),
+            (Vector3.up, Quaternion.Euler(-90, 0, 0), "top")
+        };
 
         foreach (var (direction, rotation, face) in checks)
         {
             if (!cubes.Contains(cubePosition + direction))
             {
                 short textureIndex = BlocksManager.GetTextureIndexForFace(block, face);
-                Vector2 uvBase = textureAtlas[textureIndex]; // You must have textureAtlas: Dictionary<int, Vector2>
+                Vector2 uvBase = textureAtlas[textureIndex];
 
                 faceData.Add((cubePosition + direction * 0.5f, rotation, blockId, uvBase, new Vector2(1, 1)));
             }
         }
     }
-
-
 
 
     public (Vector3[], int[], Vector2[]) GenerateChunkCollider(List<(Vector3, Quaternion, int, Vector2, Vector2)> faceData)
@@ -488,6 +503,7 @@ public class WorldGen : MonoBehaviour
 public class StagedChunk
 {
     public Vector2 chunkPosition;
+    public Dictionary<Vector3, byte> lightLevels;
     public Dictionary<Vector3, short> cubePositions;
     public Vector3[] vertices;
     public int[] triangles;

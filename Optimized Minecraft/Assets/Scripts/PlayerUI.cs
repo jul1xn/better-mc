@@ -16,6 +16,7 @@ public class PlayerUI : MonoBehaviour
     public Transform uiParent;
     public string spritePath;
     Block[] sprites;
+    bool debugMenu;
 
     private void Awake()
     {
@@ -27,6 +28,7 @@ public class PlayerUI : MonoBehaviour
         inventoryUI.SetActive(false);
         chatInputField.gameObject.SetActive(false);
         inUI = false;
+        debugMenu = false;
 
         sprites = BlocksManager.Instance.allBlocks;
         for (int i = 0; i < sprites.Length; i++)
@@ -48,8 +50,33 @@ public class PlayerUI : MonoBehaviour
         }
     }
 
+    private void OnGUI()
+    {
+        if (debugMenu)
+        {
+            GUILayoutOption[] options = new GUILayoutOption[] {
+                GUILayout.Height(20)
+            };
+            GUILayout.Label($"{Application.productName} ({Application.version}) - {Application.companyName}", options);
+            GUILayout.Label($"{Mathf.Round(1 / Time.deltaTime)} FPS ({Time.deltaTime})", options);
+            GUILayout.Label("", options);
+            GUILayout.Label($"XYZ: {PlayerMovement.instance.transform.position.x} / {PlayerMovement.instance.transform.position.y} / {PlayerMovement.instance.transform.position.z}", options);
+            GUILayout.Label($"Velocity: {PlayerMovement.instance.controller.velocity.magnitude}", options);
+            GUILayout.Label("", options);
+            GUILayout.Label($"Loaded chunks: {WorldGen.instance.loadedChunks.Count}", options);
+            GUILayout.Label($"Child count: {WorldGen.instance.transform.childCount}", options);
+            GUILayout.Label($"Staged chunks: {WorldGen.instance.stagedChunks.Count}", options);
+            GUILayout.Label($"Active threads: {WorldGen.instance.activeThreads}", options);
+        }
+    }
+
     private void Update()
     {
+        if (Input.GetKeyDown(KeyCode.F3))
+        {
+            debugMenu = !debugMenu;
+        }
+
         if (Input.GetKeyDown(KeyCode.T) && !chatOpen && !inventoryOpen)
         {
             chatOpen = true;

@@ -42,6 +42,11 @@ public class BlocksManager : MonoBehaviour
         return (short)-1;
     }
 
+    public byte GetLightLevel(int blockId)
+    {
+        return allBlocks[blockId].lightLevel;
+    }
+
     public static short GetTextureIndexForFace(Block block, string face)
     {
         switch (block.texType)

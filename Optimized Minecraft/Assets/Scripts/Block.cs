@@ -6,6 +6,10 @@ public class Block : ScriptableObject
     public string blockName;
     public Sprite uiSprite;
     public TextureType texType;
+    [Space]
+    public byte lightLevel;
+
+    [Space]
 
     [Tooltip("Used in: SingleTex, TopBottomAndSides, AllDifferent")]
     public short frontMainTexture;
