@@ -325,7 +325,7 @@ public class WorldGen : MonoBehaviour
                     Vector3 pos = new Vector3(x, y, z);
                     if (y <= stoneHeight)
                     {
-                        cubes[pos] = dirtBlock;
+                        cubes[pos] = stoneBlock;
                     }
                     else if (y == height - 1)
                     {
@@ -333,7 +333,7 @@ public class WorldGen : MonoBehaviour
                     }
                     else
                     {
-                        cubes[pos] = stoneBlock;
+                        cubes[pos] = dirtBlock;
                     }
                 }
             }

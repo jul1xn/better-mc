@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class BlocksManager : MonoBehaviour
@@ -22,6 +23,20 @@ public class BlocksManager : MonoBehaviour
     public void Start()
     {
         allBlocks = Resources.LoadAll<Block>(blockPath);
+    }
+
+    public short GetBlockByName(string name)
+    {
+        for (int i = 0; i < allBlocks.Length; i++)
+        {
+            Block b = allBlocks[i];
+            if (b.blockName == name)
+            {
+                return (short)i;
+            }
+        }
+
+        return (short)-1;
     }
 
     public static short GetTextureIndexForFace(Block block, string face)

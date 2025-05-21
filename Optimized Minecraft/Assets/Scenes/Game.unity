@@ -2008,8 +2008,8 @@ MonoBehaviour:
   cubePrefab: {fileID: 3380912828020042886, guid: 356e362116981b24c990e492e8f95bc6, type: 3}
   sharedMaterial: {fileID: 2100000, guid: 30b3d51f7a1aa9c4781437cdc3a148b2, type: 2}
   seed: -1
-  grassBlock: 1
-  dirtBlock: 2
+  grassBlock: 2
+  dirtBlock: 1
   stoneBlock: 0
   chunkDistance: 20
   chunkDestroyDistance: 70
