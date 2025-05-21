@@ -1101,6 +1101,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 8
   velocity: {x: 0, y: 0, z: 0}
+  groundGenerated: 0
 --- !u!143 &1070714333
 CharacterController:
   m_ObjectHideFlags: 0
@@ -2007,9 +2008,9 @@ MonoBehaviour:
   cubePrefab: {fileID: 3380912828020042886, guid: 356e362116981b24c990e492e8f95bc6, type: 3}
   sharedMaterial: {fileID: 2100000, guid: 30b3d51f7a1aa9c4781437cdc3a148b2, type: 2}
   seed: -1
-  grassBlock: 34
-  dirtBlock: 51
-  stoneBlock: 82
+  grassBlock: 1
+  dirtBlock: 2
+  stoneBlock: 0
   chunkDistance: 20
   chunkDestroyDistance: 70
   chunkRendDistance: 8

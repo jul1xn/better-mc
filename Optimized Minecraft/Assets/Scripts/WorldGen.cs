@@ -389,25 +389,31 @@ public class WorldGen : MonoBehaviour
 
     public void CheckFaces(Vector3 cubePosition, List<(Vector3, Quaternion, int, Vector2, Vector2)> faceData, HashSet<Vector3> cubes, short blockId)
     {
-        (Vector3 direction, Quaternion rotation, Vector3 axis1, Vector3 axis2)[] checks =
-        {
-            (Vector3.forward, Quaternion.identity, Vector3.right, Vector3.up),
-            (Vector3.back, Quaternion.Euler(0, 180, 0), Vector3.right, Vector3.up),
-            (Vector3.right, Quaternion.Euler(0, 90, 0), Vector3.forward, Vector3.up),
-            (Vector3.left, Quaternion.Euler(0, -90, 0), Vector3.forward, Vector3.up),
-            (Vector3.down, Quaternion.Euler(90, 0, 0), Vector3.right, Vector3.forward),
-            (Vector3.up, Quaternion.Euler(-90, 0, 0), Vector3.right, Vector3.forward)
-        };
+        var block = BlocksManager.Instance.allBlocks[blockId];
 
-        foreach (var (direction, rotation, axis1, axis2) in checks)
+        // Direction + rotation + face name
+        (Vector3 direction, Quaternion rotation, string face)[] checks =
+        {
+        (Vector3.forward, Quaternion.identity, "front"),
+        (Vector3.back, Quaternion.Euler(0, 180, 0), "back"),
+        (Vector3.right, Quaternion.Euler(0, 90, 0), "right"),
+        (Vector3.left, Quaternion.Euler(0, -90, 0), "left"),
+        (Vector3.down, Quaternion.Euler(90, 0, 0), "bottom"),
+        (Vector3.up, Quaternion.Euler(-90, 0, 0), "top")
+    };
+
+        foreach (var (direction, rotation, face) in checks)
         {
             if (!cubes.Contains(cubePosition + direction))
             {
-                Vector2 uvBase = textureAtlas[blockId];
+                short textureIndex = BlocksManager.GetTextureIndexForFace(block, face);
+                Vector2 uvBase = textureAtlas[textureIndex]; // You must have textureAtlas: Dictionary<int, Vector2>
+
                 faceData.Add((cubePosition + direction * 0.5f, rotation, blockId, uvBase, new Vector2(1, 1)));
             }
         }
     }
+
 
 
 

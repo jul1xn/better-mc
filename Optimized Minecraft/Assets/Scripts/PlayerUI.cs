@@ -15,7 +15,7 @@ public class PlayerUI : MonoBehaviour
     public GameObject uiPrefab;
     public Transform uiParent;
     public string spritePath;
-    Sprite[] sprites;
+    Block[] sprites;
 
     private void Awake()
     {
@@ -28,17 +28,18 @@ public class PlayerUI : MonoBehaviour
         chatInputField.gameObject.SetActive(false);
         inUI = false;
 
-        sprites = Resources.LoadAll<Sprite>(spritePath);
+        sprites = BlocksManager.Instance.allBlocks;
         for (int i = 0; i < sprites.Length; i++)
         {
+            Sprite tSprite = sprites[i].uiSprite;
             GameObject obj = Instantiate(uiPrefab, uiParent);
-            obj.GetComponent<Image>().sprite = sprites[i];
+            obj.GetComponent<Image>().sprite = tSprite;
 
             int index = i;
 
             obj.GetComponent<Button>().onClick.AddListener(() =>
             {
-                PlayerMovement.instance.mouseLook.selectedCube = (short)(index+32);
+                PlayerMovement.instance.mouseLook.selectedCube = (short)index;
                 PlayerMovement.instance.mouseLook.LockMouse();
                 inventoryUI.SetActive(false);
                 inventoryOpen = false;
