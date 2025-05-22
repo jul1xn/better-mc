@@ -6,8 +6,6 @@ using System.Collections.Concurrent;
 using System.Threading;
 using UnityEngine;
 using System.Linq;
-using UnityEditor.ShaderKeywordFilter;
-using UnityEngine.UIElements;
 
 public class WorldGen : MonoBehaviour
 {

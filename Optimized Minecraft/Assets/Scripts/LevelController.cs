@@ -10,7 +10,6 @@ using Newtonsoft.Json;
 using System;
 using UnityEngine.SceneManagement;
 using System.Reflection;
-using Palmmedia.ReportGenerator.Core.Parser.Analysis;
 
 public class LevelController : MonoBehaviour
 {

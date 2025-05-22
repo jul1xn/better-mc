@@ -7681,6 +7681,7 @@ MonoBehaviour:
   blockPath: Blocks/
   structurePath: Structures/
   allBlocks: []
+  allOres: []
   allStructures: []
 --- !u!1 &1605812694
 GameObject:
