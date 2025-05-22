@@ -14,12 +14,12 @@ OcclusionCullingSettings:
 RenderSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 9
-  m_Fog: 0
+  m_Fog: 1
   m_FogColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
-  m_FogMode: 3
+  m_FogMode: 1
   m_FogDensity: 0.01
-  m_LinearFogStart: 0
-  m_LinearFogEnd: 300
+  m_LinearFogStart: 40
+  m_LinearFogEnd: 60
   m_AmbientSkyColor: {r: 0.212, g: 0.227, b: 0.259, a: 1}
   m_AmbientEquatorColor: {r: 0.114, g: 0.125, b: 0.133, a: 1}
   m_AmbientGroundColor: {r: 0.047, g: 0.043, b: 0.035, a: 1}
@@ -2017,12 +2017,15 @@ MonoBehaviour:
   chunkRendDistance: 8
   chunksProcessedPerFrame: 1
   chunkSize: 16
-  worldMaxHeight: 100
-  noiseScale: 0.01
+  caveScale: 0.08
+  caveThreshold: 0.34
+  worldMaxHeight: 200
+  noiseScale: 0.007
   player: {fileID: 1070714331}
   debugDraw: 1
   type: 0
-  maxConcurrentThreads: 5
+  activeThreads: 0
+  maxConcurrentThreads: 10
 --- !u!4 &1969108260
 Transform:
   m_ObjectHideFlags: 0

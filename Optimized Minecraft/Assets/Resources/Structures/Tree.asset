@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: Tree
   m_EditorClassIdentifier: 
   commonness: 200
+  spawnBlock: 2
   blocks:
   - relativePosition: {x: 0, y: 0, z: 0}
     blockId: 3

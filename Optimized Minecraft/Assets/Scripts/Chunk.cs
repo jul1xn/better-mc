@@ -164,7 +164,8 @@ public class Chunk : MonoBehaviour
 
         foreach (KeyValuePair<Vector3, short> cube in cubes)
         {
-            WorldGen.instance.CheckFaces(cube.Key, faceData, cubeSet, cube.Value); // Use a default block ID (e.g., 34 for dirt)
+            byte lightLevel = BlocksManager.Instance.GetLightLevel((int)cube.Value);
+            WorldGen.instance.CheckFaces(cube.Key, faceData, cubeSet, cube.Value, lightLevel, new Dictionary<Vector3, byte>()); // Use a default block ID (e.g., 34 for dirt)
         }
 
         (Vector3[], int[], Vector2[]) meshData = WorldGen.instance.GenerateChunkCollider(faceData);

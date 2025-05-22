@@ -26,6 +26,8 @@ public class WorldGen : MonoBehaviour
     public int chunkRendDistance = 2;
     public int chunksProcessedPerFrame = 1;
     public int chunkSize = 32;
+    public float caveScale = 0.05f;       // Controls how frequent caves appear
+    public float caveThreshold = 0.4f;    // Controls how "empty" caves are — lower = fewer caves, higher = more caves
     public static int maxHeight = 10;
     public int worldMaxHeight = 100;
     public float noiseScale = 0.1f;
@@ -74,11 +76,11 @@ public class WorldGen : MonoBehaviour
 
         if (type == WorldType.Normal)
         {
-            maxHeight = 20;
+            maxHeight = 50;
         }
         if (type == WorldType.Amplified)
         {
-            maxHeight = 100;
+            maxHeight = 150;
         }
         if (type == WorldType.Debug)
         {
@@ -221,6 +223,23 @@ public class WorldGen : MonoBehaviour
         return noise1 + noise2 + noise3 + noise4;
     }
 
+    float Get3DNoise(float x, float y, float z)
+    {
+        x *= caveScale;
+        y *= caveScale;
+        z *= caveScale;
+
+        float xy = Mathf.PerlinNoise(x, y);
+        float yz = Mathf.PerlinNoise(y, z);
+        float xz = Mathf.PerlinNoise(x, z);
+        float yx = Mathf.PerlinNoise(y, x);
+        float zy = Mathf.PerlinNoise(z, y);
+        float zx = Mathf.PerlinNoise(z, x);
+
+        return (xy + yz + xz + yx + zy + zx) / 6f;
+    }
+
+
     private void ProcessStagedChunks()
     {
         if (stagedChunks.Count > 0)
@@ -315,33 +334,36 @@ public class WorldGen : MonoBehaviour
             {
                 float noiseValue = GetNoise(seed, x * noiseScale, z * noiseScale);
                 int height = Mathf.RoundToInt(noiseValue * maxHeight);
-                int stoneHeight = height / 2;
+                int stoneHeight = (int)(height * 0.85f);
 
                 Log($"[ChunkThread] Noise at ({x}, {z}): {noiseValue}, height: {height}, stoneHeight: {stoneHeight}");
 
                 for (int y = 0; y < height; y++)
                 {
                     Vector3 pos = new Vector3(x, y, z);
+
+                    float caveNoise = Get3DNoise(x, y, z);
+                    if (caveNoise < caveThreshold)
+                    {
+                        continue; // Skip block to make a cave
+                    }
+
                     if (y <= stoneHeight)
-                    {
                         cubes[pos] = stoneBlock;
-                    }
                     else if (y == height - 1)
-                    {
                         cubes[pos] = grassBlock;
-                    }
                     else
-                    {
                         cubes[pos] = dirtBlock;
-                    }
                 }
+
 
                 System.Random rng = new System.Random((int)(seed + x * 73856093 + z * 19349663)); // Unique seed per chunk
                 foreach(Structure s in BlocksManager.Instance.allStructures)
                 {
-                    if (rng.Next(s.commonness) == 0)
+                    Vector3 basePos = new Vector3(x, height, z);
+
+                    if (rng.Next(s.commonness) == 0 && cubes.ContainsKey(new Vector3(x, height - 1, z)))
                     {
-                        Vector3 basePos = new Vector3(x, height, z);
                         foreach (StructureBlock block in s.blocks)
                         {
                             Vector3 targetPos = basePos + block.relativePosition;
@@ -386,26 +408,18 @@ public class WorldGen : MonoBehaviour
         Log($"[ChunkThread] Starting face detection for chunk {chunkPos}");
         List<(Vector3, Quaternion, int, Vector2, Vector2)> faceData = new List<(Vector3, Quaternion, int, Vector2, Vector2)>();
         HashSet<Vector3> cubeSet = new HashSet<Vector3>(cubes.Keys);
+        Dictionary<Vector3, byte> lightLevels = new Dictionary<Vector3, byte>();
          
-        foreach (Vector3 cube in cubes.Keys)
+        foreach (var cube in cubes)
         {
-            CheckFaces(cube, faceData, cubeSet, cubes[cube]);
+            byte lightLevel = BlocksManager.Instance.GetLightLevel((int)cube.Value);
+            CheckFaces(cube.Key, faceData, cubeSet, cubes[cube.Key], lightLevel, lightLevels);
         }
         Log($"[ChunkThread] Face detection complete. Total faces: {faceData.Count}");
 
         Log($"[ChunkThread] Generating mesh data for chunk {chunkPos}");
         (Vector3[], int[], Vector2[]) meshData = GenerateChunkCollider(faceData);
         Log($"[ChunkThread] Mesh data generated: Vertices: {meshData.Item1.Length}, Triangles: {meshData.Item2.Length}, UVs: {meshData.Item3.Length}");
-
-        Dictionary<Vector3, byte> lightLevels = new Dictionary<Vector3, byte>();
-        foreach(var kvp in cubes)
-        {
-            byte lightLevel = BlocksManager.Instance.GetLightLevel((int)kvp.Value);
-            if (lightLevel != 0)
-            {
-                lightLevels[kvp.Key] = lightLevel;
-            }
-        }
 
 
         StagedChunk chunk = new StagedChunk();
@@ -421,7 +435,7 @@ public class WorldGen : MonoBehaviour
     }
 
 
-    public void CheckFaces(Vector3 cubePosition, List<(Vector3, Quaternion, int, Vector2, Vector2)> faceData, HashSet<Vector3> cubes, short blockId)
+    public void CheckFaces(Vector3 cubePosition, List<(Vector3, Quaternion, int, Vector2, Vector2)> faceData, HashSet<Vector3> cubes, short blockId, byte lightLevel, Dictionary<Vector3, byte> lightLevelData)
     {
         Block block = BlocksManager.Instance.allBlocks[blockId];
 
@@ -443,6 +457,10 @@ public class WorldGen : MonoBehaviour
                 Vector2 uvBase = textureAtlas[textureIndex];
 
                 faceData.Add((cubePosition + direction * 0.5f, rotation, blockId, uvBase, new Vector2(1, 1)));
+                //if (lightLevel > 0)
+                //{
+                //    lightLevelData[cubePosition + direction * 0.7f] = lightLevel;
+                //}
             }
         }
     }
