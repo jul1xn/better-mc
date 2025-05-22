@@ -338,11 +338,11 @@ public class WorldGen : MonoBehaviour
 
                 Log($"[ChunkThread] Noise at ({x}, {z}): {noiseValue}, height: {height}, stoneHeight: {stoneHeight}");
 
-                for (int y = 0; y < height; y++)
+                for (int y = -30; y < height; y++)
                 {
                     Vector3 pos = new Vector3(x, y, z);
 
-                    float caveNoise = Get3DNoise(x, y, z);
+                    float caveNoise = Get3DNoise(x, y + 30, z);
                     if (caveNoise < caveThreshold)
                     {
                         continue; // Skip block to make a cave
@@ -355,6 +355,8 @@ public class WorldGen : MonoBehaviour
                     else
                         cubes[pos] = dirtBlock;
                 }
+
+                cubes[new Vector3(x, -31, z)] = 9;
 
 
                 System.Random rng = new System.Random((int)(seed + x * 73856093 + z * 19349663)); // Unique seed per chunk
@@ -513,7 +515,7 @@ public class WorldGen : MonoBehaviour
 
     public void Log(string msg)
     {
-        UnityEngine.Debug.Log("[WorldGen] " + msg);
+        //UnityEngine.Debug.Log("[WorldGen] " + msg);
     }
 }
 

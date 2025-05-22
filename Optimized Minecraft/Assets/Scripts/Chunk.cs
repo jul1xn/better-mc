@@ -130,6 +130,11 @@ public class Chunk : MonoBehaviour
             // Remove the block
             if (cubes.ContainsKey(blockPos))
             {
+                if (cubes[blockPos] == 9)
+                {
+                    return;
+                }
+
                 string pos = WorldSave.ConvertVector3ToString(blockPos);
                 LevelController.instance.t_worldsave.modifiedChunks[_chunkPos][pos] = -1;
                 cubes.Remove(blockPos);
