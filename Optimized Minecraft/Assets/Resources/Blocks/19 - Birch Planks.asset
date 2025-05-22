@@ -10,13 +10,16 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 824286817a2b58648bef5073c9231aa8, type: 3}
-  m_Name: 8 - Glowstone
+  m_Name: 19 - Birch Planks
   m_EditorClassIdentifier: 
-  blockName: Glowstone
-  uiSprite: {fileID: 1184278791, guid: c171dd08b24a5044783a1d94ce7ed25b, type: 3}
+  blockName: Birch Planks
+  uiSprite: {fileID: 215923094, guid: c171dd08b24a5044783a1d94ce7ed25b, type: 3}
   texType: 0
-  lightLevel: 15
-  frontMainTexture: 261
+  lightLevel: 0
+  isOre: 0
+  oreVeinSize: 0
+  oreRarity: 0
+  frontMainTexture: 87
   backTexture: 0
   leftTexture: 0
   rightTexture: 0

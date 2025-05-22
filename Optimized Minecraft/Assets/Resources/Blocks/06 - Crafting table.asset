@@ -10,14 +10,14 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 824286817a2b58648bef5073c9231aa8, type: 3}
-  m_Name: 0 - Stone
+  m_Name: 06 - Crafting table
   m_EditorClassIdentifier: 
-  blockName: Stone
-  uiSprite: {fileID: -35051524, guid: c171dd08b24a5044783a1d94ce7ed25b, type: 3}
-  texType: 0
-  frontMainTexture: 51
-  backTexture: 0
-  leftTexture: 0
-  rightTexture: 0
-  topTexture: 0
-  bottomTexture: 0
+  blockName: Crafting Table
+  uiSprite: {fileID: -1511726029, guid: c171dd08b24a5044783a1d94ce7ed25b, type: 3}
+  texType: 2
+  frontMainTexture: 173
+  backTexture: 174
+  leftTexture: 174
+  rightTexture: 174
+  topTexture: 172
+  bottomTexture: 85

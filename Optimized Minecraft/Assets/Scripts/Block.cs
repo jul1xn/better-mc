@@ -8,6 +8,10 @@ public class Block : ScriptableObject
     public TextureType texType;
     [Space]
     public byte lightLevel;
+    [Space]
+    public bool isOre;
+    public int oreVeinSize;
+    public float oreRarity;
 
     [Space]
 

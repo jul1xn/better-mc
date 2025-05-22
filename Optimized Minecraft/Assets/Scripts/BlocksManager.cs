@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Unity.VisualScripting;
 using UnityEngine;
 
@@ -8,6 +9,7 @@ public class BlocksManager : MonoBehaviour
     public string blockPath;
     public string structurePath;
     public Block[] allBlocks;
+    public Block[] allOres;
     public Structure[] allStructures;
     public static BlocksManager Instance;
 
@@ -25,6 +27,7 @@ public class BlocksManager : MonoBehaviour
     public void Start()
     {
         allBlocks = Resources.LoadAll<Block>(blockPath);
+        allOres = allBlocks.Where(x => x.isOre).ToArray();
         allStructures = Resources.LoadAll<Structure>(structurePath);
     }
 

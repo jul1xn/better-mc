@@ -1092,11 +1092,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   mouseLook: {fileID: 963194229}
   controller: {fileID: 1070714333}
-  speed: 5
-  gravity: -9.81
+  speed: 4.317
+  gravity: -19.62
   jump: 1
   groundCheck: {fileID: 805988594}
-  groundDistance: 0.1
+  groundDistance: 0.2
   groundMask:
     serializedVersion: 2
     m_Bits: 8
@@ -1124,7 +1124,7 @@ CharacterController:
   m_Height: 1.8
   m_Radius: 0.3
   m_SlopeLimit: 45
-  m_StepOffset: 0.3
+  m_StepOffset: 0.1
   m_SkinWidth: 0.08
   m_MinMoveDistance: 0.001
   m_Center: {x: 0, y: 0, z: 0}

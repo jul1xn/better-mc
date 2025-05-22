@@ -18,6 +18,7 @@ public class PlayerMovement : MonoBehaviour
 
     public Vector3 velocity;
     bool isGrounded;
+    bool sprinting;
 
     public bool groundGenerated;
 
@@ -65,11 +66,18 @@ public class PlayerMovement : MonoBehaviour
 
         float x = 0f;
         float z = 0f;
+        float multiplier = 1;
 
         if (Input.GetKey(KeyCode.A)) x = -1f; // Move left
         if (Input.GetKey(KeyCode.D)) x = 1f;  // Move right
         if (Input.GetKey(KeyCode.W)) z = 1f;  // Move forward
         if (Input.GetKey(KeyCode.S)) z = -1f; // Move backward
+        sprinting = Input.GetKey(KeyCode.LeftShift);
+
+        if (sprinting)
+        {
+            multiplier = 1.3f;
+        }
 
         if (PlayerUI.instance.inUI)
         {
@@ -80,7 +88,12 @@ public class PlayerMovement : MonoBehaviour
 
         Vector3 move = transform.right * x + transform.forward * z;
 
-        controller.Move(move * speed * Time.deltaTime);
+        if (move.magnitude > 1)
+        {
+            move.Normalize();
+        }
+
+        controller.Move(move * (speed * multiplier) * Time.deltaTime);
 
         if (Input.GetButtonDown("Jump") && isGrounded && !PlayerUI.instance.inUI)
         {

@@ -10,14 +10,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 824286817a2b58648bef5073c9231aa8, type: 3}
-  m_Name: 6 - Crafting table
+  m_Name: 18 - Brich Log
   m_EditorClassIdentifier: 
-  blockName: Crafting Table
-  uiSprite: {fileID: -1511726029, guid: c171dd08b24a5044783a1d94ce7ed25b, type: 3}
-  texType: 2
-  frontMainTexture: 173
-  backTexture: 174
-  leftTexture: 174
-  rightTexture: 174
-  topTexture: 172
-  bottomTexture: 85
+  blockName: Birch Log
+  uiSprite: {fileID: 1139550521, guid: c171dd08b24a5044783a1d94ce7ed25b, type: 3}
+  texType: 1
+  lightLevel: 0
+  isOre: 0
+  oreVeinSize: 0
+  oreRarity: 0
+  frontMainTexture: 135
+  backTexture: 0
+  leftTexture: 0
+  rightTexture: 0
+  topTexture: 136
+  bottomTexture: 136
