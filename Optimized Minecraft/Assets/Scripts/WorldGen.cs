@@ -403,32 +403,39 @@ public class WorldGen : MonoBehaviour
 
     private void ChunkThread(Vector2 chunkPos)
     {
-        Log($"[ChunkThread] Started for chunk {chunkPos}");
+        Stopwatch sw = new Stopwatch();
+        long terrainTime, modTime, faceTime, meshTime, totalTime;
 
         try
         {
+            sw.Start();
             Dictionary<Vector3, short> cubes = new Dictionary<Vector3, short>();
-            HashSet<Vector3> cubeSet;
             Dictionary<Vector3, byte> lightLevels = new Dictionary<Vector3, byte>();
+            HashSet<Vector3> cubeSet;
 
-            Log($"[ChunkThread] Generating terrain...");
             GenerateTerrain(chunkPos, ref cubes);
-            Log($"[ChunkThread] Terrain generation complete. Total blocks: {cubes.Count}");
+            sw.Stop();
+            terrainTime = sw.ElapsedMilliseconds;
 
-            Log($"[ChunkThread] Applying modified blocks...");
+            sw.Restart();
             ApplyModifiedBlocks(chunkPos, ref cubes);
-            Log($"[ChunkThread] Modifications applied. Total blocks after mods: {cubes.Count}");
+            sw.Stop();
+            modTime = sw.ElapsedMilliseconds;
 
+            sw.Restart();
             cubeSet = new HashSet<Vector3>(cubes.Keys);
+            var faceData = CreateFaces(ref cubes, ref lightLevels, cubeSet);
+            sw.Stop();
+            faceTime = sw.ElapsedMilliseconds;
 
-            Log($"[ChunkThread] Creating faces...");
-            List<(Vector3, Quaternion, int, Vector2, Vector2)> faceData = CreateFaces(ref cubes, ref lightLevels, cubeSet);
-            Log($"[ChunkThread] Face data created. Face count: {faceData.Count}");
+            sw.Restart();
+            var (verts, tris, uvs) = GenerateChunkCollider(faceData);
+            sw.Stop();
+            meshTime = sw.ElapsedMilliseconds;
 
-            Log($"[ChunkThread] Generating mesh data...");
-            (Vector3[] verts, int[] tris, Vector2[] uvs) = GenerateChunkCollider(faceData);
-            Log($"[ChunkThread] Mesh generated. Verts: {verts.Length}, Tris: {tris.Length}, UVs: {uvs.Length}");
+            totalTime = terrainTime + modTime + faceTime + meshTime;
 
+            // Enqueue result
             StagedChunk chunk = new StagedChunk
             {
                 lightLevels = lightLevels,
@@ -440,19 +447,32 @@ public class WorldGen : MonoBehaviour
             };
 
             stagedChunks.Enqueue(chunk);
-            Log($"[ChunkThread] Chunk {chunkPos} enqueued for main thread processing.");
-        }
 
+            // Write CSV entry
+            string csvLine = $"{chunkPos.x},{chunkPos.y},{terrainTime},{modTime},{faceTime},{meshTime},{totalTime}";
+            WriteTimingToCsv(csvLine);
+        }
         catch (Exception ex)
         {
             UnityEngine.Debug.LogError($"[ChunkThread ERROR] Chunk {chunkPos}: {ex.Message}\n{ex.StackTrace}");
         }
-        finally
-        {
-            Log($"[ChunkThread] Finished chunk {chunkPos}");
-        }
     }
 
+    private void WriteTimingToCsv(string line)
+    {
+        lock (csvLock)
+        {
+            bool writeHeader = !System.IO.File.Exists(ChunkTimingCsvPath);
+            using (var writer = new System.IO.StreamWriter(ChunkTimingCsvPath, append: true))
+            {
+                if (writeHeader)
+                {
+                    writer.WriteLine("ChunkX,ChunkY,TerrainTime(ms),ModificationTime(ms),FaceTime(ms),MeshTime(ms),TotalTime(ms)");
+                }
+                writer.WriteLine(line);
+            }
+        }
+    }
 
 
     public void CheckFaces(Vector3 cubePosition, List<(Vector3, Quaternion, int, Vector2, Vector2)> faceData, HashSet<Vector3> cubes, short blockId, byte lightLevel, Dictionary<Vector3, byte> lightLevelData)
@@ -546,6 +566,11 @@ public class WorldGen : MonoBehaviour
             UnityEngine.Debug.LogWarning("[WorldGen] " + msg);
         }
     }
+
+    // For Debugging purposes
+    private static readonly object csvLock = new object();
+    private const string ChunkTimingCsvPath = "ChunkGenerationTimings.csv";
+
 }
 
 [Serializable]
