@@ -121,6 +121,11 @@ public class PlayerUI : MonoBehaviour
             {
                 PlayerMovement.instance.groundGenerated = true;
             }
+
+            if (msgs[0] == "fly")
+            {
+                PlayerMovement.instance.ToggleFly();
+            }
         }
     }
 }

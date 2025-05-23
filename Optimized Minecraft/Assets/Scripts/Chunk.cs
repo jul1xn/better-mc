@@ -14,6 +14,7 @@ public class Chunk : MonoBehaviour
     Vector3 chunkCenter;
     public Dictionary<Vector3, short> cubes;
     public string _chunkPos;
+    public Vector2 _chunk;
 
     Vector3 pos1;
     Vector3 pos2;
@@ -25,7 +26,8 @@ public class Chunk : MonoBehaviour
         // Calculate the chunk center manually
         float chunkSize = WorldGen.instance.chunkSize;
         string[] lines = gameObject.name.Split(";");
-        Vector3 actualPos = new Vector3(int.Parse(lines[0]), transform.position.y, int.Parse(lines[1]));
+        _chunk = new Vector2(int.Parse(lines[0]), int.Parse(lines[1]));
+        Vector3 actualPos = new Vector3(_chunk.x, transform.position.y, _chunk.y);
         chunkCenter = actualPos + new Vector3(chunkSize / 2f, chunkSize / 2f, chunkSize / 2f);
     }
 
@@ -156,13 +158,12 @@ public class Chunk : MonoBehaviour
     }
 
 
-
-
     private void UpdateChunkMesh()
     {
         List<Vector3> vertices = new List<Vector3>();
         List<int> triangles = new List<int>();
         List<Vector2> uvs = new List<Vector2>();
+        Dictionary<Vector3, byte> lightLevels = new Dictionary<Vector3, byte>();
 
         HashSet<Vector3> cubeSet = new HashSet<Vector3>(cubes.Keys);
         List<(Vector3, Quaternion, int, Vector2, Vector2)> faceData = new List<(Vector3, Quaternion, int, Vector2, Vector2)>();
@@ -170,19 +171,20 @@ public class Chunk : MonoBehaviour
         foreach (KeyValuePair<Vector3, short> cube in cubes)
         {
             byte lightLevel = BlocksManager.Instance.GetLightLevel((int)cube.Value);
-            WorldGen.instance.CheckFaces(cube.Key, faceData, cubeSet, cube.Value, lightLevel, new Dictionary<Vector3, byte>()); // Use a default block ID (e.g., 34 for dirt)
+            WorldGen.instance.CheckFaces(cube.Key, faceData, cubeSet, cube.Value, lightLevel, lightLevels);
         }
 
         (Vector3[], int[], Vector2[]) meshData = WorldGen.instance.GenerateChunkCollider(faceData);
 
-        Mesh mesh = new Mesh();
-        mesh.vertices = meshData.Item1;
-        mesh.triangles = meshData.Item2;
-        mesh.uv = meshData.Item3;
-        mesh.RecalculateNormals();
+        StagedChunk chunk = new StagedChunk();
+        chunk.lightLevels = lightLevels;
+        chunk.vertices = meshData.Item1;
+        chunk.triangles = meshData.Item2;
+        chunk.uvs = meshData.Item3;
+        chunk.chunkPosition = _chunk;
+        chunk.cubePositions = cubes;
 
-        GetComponent<MeshFilter>().mesh = mesh;
-        GetComponent<MeshCollider>().sharedMesh = mesh;
+        WorldGen.instance.loadedChunks.Remove(_chunk);
+        WorldGen.instance.stagedChunks.Enqueue(chunk);
     }
-
 }

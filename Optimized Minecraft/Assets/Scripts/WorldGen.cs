@@ -251,7 +251,9 @@ public class WorldGen : MonoBehaviour
                     return;
                 }
 
-                GameObject chunk = new GameObject($"{stagedChunk.chunkPosition.x};{stagedChunk.chunkPosition.y}");
+                string positionString = $"{stagedChunk.chunkPosition.x};{stagedChunk.chunkPosition.y}";
+
+                GameObject chunk = new GameObject();
                 chunk.transform.parent = transform;
                 chunk.layer = gameObject.layer;
                 Chunk c = chunk.AddComponent<Chunk>();
@@ -295,6 +297,13 @@ public class WorldGen : MonoBehaviour
                 meshCollider.sharedMesh = mesh;
                 loadedChunks[stagedChunk.chunkPosition] = chunk;
                 processed++;
+
+                if (GameObject.Find(positionString) != null)
+                {
+                    Destroy(GameObject.Find(positionString));
+                }
+
+                chunk.name = positionString;
             }
         }
     }
@@ -318,14 +327,8 @@ public class WorldGen : MonoBehaviour
         });
     }
 
-
-    private void ChunkThread(Vector2 chunkPos)
+    private void GenerateTerrain(Vector2 chunkPos, ref Dictionary<Vector3, short> cubes)
     {
-        Log($"[ChunkThread] Starting chunk generation at {chunkPos}");
-        Dictionary<Vector3, short> cubes = new Dictionary<Vector3, short>();
-        string chunkKey = WorldSave.ConvertVector2ToString(chunkPos);
-
-        Log($"[ChunkThread] Calculating terrain height for chunk {chunkPos}");
         for (int x = (int)chunkPos.x; x < chunkPos.x + chunkSize; x++)
         {
             for (int z = (int)chunkPos.y; z < chunkPos.y + chunkSize; z++)
@@ -358,7 +361,7 @@ public class WorldGen : MonoBehaviour
 
 
                 System.Random rng = new System.Random((int)(seed + x * 73856093 + z * 19349663)); // Unique seed per chunk
-                foreach(Structure s in BlocksManager.Instance.allStructures)
+                foreach (Structure s in BlocksManager.Instance.allStructures)
                 {
                     Vector3 basePos = new Vector3(x, height, z);
 
@@ -380,7 +383,11 @@ public class WorldGen : MonoBehaviour
                 }
             }
         }
+    }
 
+    private void ApplyModifiedBlocks(Vector2 chunkPos, ref Dictionary<Vector3, short> cubes)
+    {
+        string chunkKey = WorldSave.ConvertVector2ToString(chunkPos);
         if (modifiedBlockCopy.TryGetValue(chunkKey, out var modifications))
         {
             Log($"[ChunkThread] Chunk {chunkPos} is modified");
@@ -402,7 +409,18 @@ public class WorldGen : MonoBehaviour
                 }
             }
         }
+    }
 
+
+    private void ChunkThread(Vector2 chunkPos)
+    {
+        Log($"[ChunkThread] Starting chunk generation at {chunkPos}");
+        Dictionary<Vector3, short> cubes = new Dictionary<Vector3, short>();
+
+        Log($"[ChunkThread] Calculating terrain height for chunk {chunkPos}");
+
+        GenerateTerrain(chunkPos, ref cubes);
+        ApplyModifiedBlocks(chunkPos, ref cubes);
 
 
         Log($"[ChunkThread] Starting face detection for chunk {chunkPos}");

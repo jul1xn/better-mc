@@ -19,6 +19,7 @@ public class PlayerMovement : MonoBehaviour
     public Vector3 velocity;
     bool isGrounded;
     bool sprinting;
+    bool flymode;
 
     public bool groundGenerated;
 
@@ -30,6 +31,12 @@ public class PlayerMovement : MonoBehaviour
     private void Start()
     {
         groundGenerated = false;
+        flymode = false;
+    }
+
+    public void ToggleFly()
+    {
+        flymode = !flymode;
     }
 
     private void OnDrawGizmos()
@@ -46,6 +53,57 @@ public class PlayerMovement : MonoBehaviour
     }
 
     void Update()
+    {
+        if (flymode)
+        {
+            Fly();
+        }
+        else
+        {
+            Movement();
+        }
+    }
+
+    private void Fly()
+    {
+        float x = 0f;
+        float z = 0f;
+        float y = 0f;
+        float multiplier = 3f;
+
+        if (Input.GetKey(KeyCode.A)) x = -1f;
+        if (Input.GetKey(KeyCode.D)) x = 1f;
+        if (Input.GetKey(KeyCode.W)) z = 1f;
+        if (Input.GetKey(KeyCode.S)) z = -1f;
+
+        if (Input.GetKey(KeyCode.Space)) y = 1f;      // Fly up
+        if (Input.GetKey(KeyCode.LeftControl)) y = -1f; // Fly down
+
+        sprinting = Input.GetKey(KeyCode.LeftShift);
+        if (sprinting)
+        {
+            multiplier = 4.5f;
+        }
+
+        if (PlayerUI.instance.inUI)
+        {
+            x = 0;
+            z = 0;
+            y = 0;
+        }
+
+        Vector3 move = transform.right * x + transform.forward * z + transform.up * y;
+
+        if (move.magnitude > 1)
+        {
+            move.Normalize();
+        }
+
+        controller.Move(move * speed * multiplier * Time.deltaTime);
+    }
+
+
+    private void Movement()
     {
         if (!groundGenerated)
         {
