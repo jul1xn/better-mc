@@ -83,7 +83,7 @@ public class LevelController : MonoBehaviour
 
     public void LoadWorld(string name)
     {
-        t_loadedWorldName = WorldSave.ConvertToValidFilename(name);
+        t_loadedWorldName = Helper.ConvertToValidFilename(name);
         string fileName = $"\\{t_loadedWorldName}.save";
         string path = Application.persistentDataPath + fileName;
 
@@ -103,8 +103,8 @@ public class LevelController : MonoBehaviour
             int height = Mathf.RoundToInt(noiseValue * WorldGen.maxHeight);
 
             Vector3 playerPosition = new Vector3(0, (height * 2) + 1, 0);
-            t_worldsave.playerPosition = WorldSave.ConvertVector3ToString(playerPosition);
-            t_worldsave.playerRotation = WorldSave.ConvertVector3ToString(Vector3.zero);
+            t_worldsave.playerPosition = Helper.ConvertVector3ToString(playerPosition);
+            t_worldsave.playerRotation = Helper.ConvertVector3ToString(Vector3.zero);
         }
 
         SceneManager.LoadScene(1);
@@ -115,9 +115,9 @@ public class LevelController : MonoBehaviour
         string fileName = $"\\{t_loadedWorldName}.save";
         string path = Application.persistentDataPath + fileName;
 
-        t_worldsave.playerPosition = WorldSave.ConvertVector3ToString(PlayerMovement.instance.transform.position);
-        t_worldsave.playerRotation = WorldSave.ConvertVector3ToString(new Vector3(PlayerMovement.instance.mouseLook.transform.eulerAngles.x, PlayerMovement.instance.transform.eulerAngles.y, 0f));
-        t_worldsave.image = WorldSave.Texture2DToByteString(CaptureScreenshot64x64());
+        t_worldsave.playerPosition = Helper.ConvertVector3ToString(PlayerMovement.instance.transform.position);
+        t_worldsave.playerRotation = Helper.ConvertVector3ToString(new Vector3(PlayerMovement.instance.mouseLook.transform.eulerAngles.x, PlayerMovement.instance.transform.eulerAngles.y, 0f));
+        t_worldsave.image = Helper.Texture2DToByteString(CaptureScreenshot64x64());
 
         string data = JsonConvert.SerializeObject(t_worldsave);
         File.WriteAllText(path, data);
@@ -126,7 +126,7 @@ public class LevelController : MonoBehaviour
 
     public static string GetMenuFileSize(string name)
     {
-        string fileName = $"\\{WorldSave.ConvertToValidFilename(name)}.save";
+        string fileName = $"\\{Helper.ConvertToValidFilename(name)}.save";
         string path = Application.persistentDataPath + fileName;
         if (File.Exists(path))
         {
@@ -151,71 +151,4 @@ public class WorldSave
     public Dictionary<string, Dictionary<string, short>> modifiedChunks;
     public string playerPosition;
     public string playerRotation;
-
-    public static string GetBoolText(bool value)
-    {
-        if (value)
-        {
-            return "ON";
-        }
-        else
-        {
-            return "OFF";
-        }
-    }
-
-    public static string ConvertToValidFilename(string input)
-    {
-        if (string.IsNullOrWhiteSpace(input))
-        {
-            return "";
-        }
-
-        input = input.ToLower();
-        input = input.Replace(' ', '_');
-        input = Regex.Replace(input, @"[^a-z0-9_]", "");
-        input = input.Trim('_');
-
-        return input;
-    }
-
-    public static string Texture2DToByteString(Texture2D texture)
-    {
-        if (texture == null) return null;
-
-        byte[] textureBytes = texture.EncodeToPNG();
-        return Convert.ToBase64String(textureBytes);
-    }
-
-    public static Texture2D ByteStringToTexture2D(string base64String)
-    {
-        if (string.IsNullOrEmpty(base64String)) return null;
-
-        byte[] textureBytes = Convert.FromBase64String(base64String);
-        Texture2D texture = new Texture2D(2, 2);
-        texture.LoadImage(textureBytes);
-        return texture;
-    }
-
-    public static string ConvertVector2ToString(Vector2 position)
-    {
-        return $"{position.x};{position.y}";
-    }
-
-    public static string ConvertVector3ToString(Vector3 position)
-    {
-        return $"{position.x};{position.y};{position.z}";
-    }
-
-    public static Vector3 ConvertStringToVector3(string value)
-    {
-        string[] lines = value.Split(';');
-        return new Vector3(float.Parse(lines[0]), float.Parse(lines[1]), float.Parse(lines[2]));
-    }
-
-    public static Vector2 ConvertStringToVector2(string value)
-    {
-        string[] lines = value.Split(';');
-        return new Vector2(float.Parse(lines[0]), float.Parse(lines[1]));
-    }
 }

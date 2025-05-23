@@ -14,7 +14,7 @@ public class OptionsUI : MonoBehaviour
 
     private void Start()
     {
-        frustumCulling.text = $"Frustum culling: {WorldSave.GetBoolText(LevelController.instance.s_frustumCulling)}";
+        frustumCulling.text = $"Frustum culling: {Helper.GetBoolText(LevelController.instance.s_frustumCulling)}";
         fieldOfView.text = $"Fov: {Mathf.Round(LevelController.instance.s_fov)}";
         fieldOfViewSlider.value = LevelController.instance.s_fov;
 
@@ -35,7 +35,7 @@ public class OptionsUI : MonoBehaviour
     public void ToggleFC()
     {
         LevelController.instance.s_frustumCulling = !LevelController.instance.s_frustumCulling;
-        frustumCulling.text = $"Frustum culling: {WorldSave.GetBoolText(LevelController.instance.s_frustumCulling)}";
+        frustumCulling.text = $"Frustum culling: {Helper.GetBoolText(LevelController.instance.s_frustumCulling)}";
     }
 
     public void SetFov(float fov)

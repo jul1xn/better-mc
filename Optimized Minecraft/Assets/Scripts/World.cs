@@ -21,7 +21,7 @@ public class World : MonoBehaviour
         save = JsonConvert.DeserializeObject<WorldSave>(File.ReadAllText(path));
         worldName.text = save.worldName;
 
-        Texture2D tex = WorldSave.ByteStringToTexture2D(save.image);
+        Texture2D tex = Helper.ByteStringToTexture2D(save.image);
         tex.filterMode = FilterMode.Point;
         previewImage.texture = tex;
     }

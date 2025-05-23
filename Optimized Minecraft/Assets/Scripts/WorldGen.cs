@@ -97,8 +97,8 @@ public class WorldGen : MonoBehaviour
         }
         lastPlayerChunk = GetChunkCoord(player.position);
 
-        PlayerMovement.instance.TeleportToPosition(WorldSave.ConvertStringToVector3(LevelController.instance.t_worldsave.playerPosition));
-        PlayerMovement.instance.mouseLook.SetRotation(WorldSave.ConvertStringToVector3(LevelController.instance.t_worldsave.playerRotation));
+        PlayerMovement.instance.TeleportToPosition(Helper.ConvertStringToVector3(LevelController.instance.t_worldsave.playerPosition));
+        PlayerMovement.instance.mouseLook.SetRotation(Helper.ConvertStringToVector3(LevelController.instance.t_worldsave.playerRotation));
 
         LoadChunksAroundPlayer();
     }
@@ -264,7 +264,7 @@ public class WorldGen : MonoBehaviour
             MeshCollider collider = chunkObj.AddComponent<MeshCollider>();
             Chunk chunk = chunkObj.AddComponent<Chunk>();
 
-            chunk._chunkPos = WorldSave.ConvertVector2ToString(chunkPos);
+            chunk._chunkPos = Helper.ConvertVector2ToString(chunkPos);
             chunk.cubes = stagedChunk.cubePositions;
 
             Mesh mesh = new Mesh
@@ -368,14 +368,14 @@ public class WorldGen : MonoBehaviour
 
     private void ApplyModifiedBlocks(Vector2 chunkPos, ref Dictionary<Vector3, short> cubes)
     {
-        string chunkKey = WorldSave.ConvertVector2ToString(chunkPos);
+        string chunkKey = Helper.ConvertVector2ToString(chunkPos);
         if (modifiedBlockCopy.TryGetValue(chunkKey, out var modifications))
         {
             var localCopy = new Dictionary<string, short>(modifications);
 
             foreach (var kvp in localCopy)
             {
-                Vector3 pos = WorldSave.ConvertStringToVector3(kvp.Key);
+                Vector3 pos = Helper.ConvertStringToVector3(kvp.Key);
                 if (kvp.Value == -1)
                 {
                     cubes.Remove(pos);

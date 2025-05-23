@@ -137,7 +137,7 @@ public class Chunk : MonoBehaviour
                     return;
                 }
 
-                string pos = WorldSave.ConvertVector3ToString(blockPos);
+                string pos = Helper.ConvertVector3ToString(blockPos);
                 LevelController.instance.t_worldsave.modifiedChunks[_chunkPos][pos] = -1;
                 cubes.Remove(blockPos);
                 UpdateChunkMesh();
@@ -150,7 +150,7 @@ public class Chunk : MonoBehaviour
             if (!cubes.ContainsKey(newBlockPos))
             {
                 cubes[newBlockPos] = PlayerMovement.instance.mouseLook.selectedCube;
-                string pos = WorldSave.ConvertVector3ToString(newBlockPos);
+                string pos = Helper.ConvertVector3ToString(newBlockPos);
                 LevelController.instance.t_worldsave.modifiedChunks[_chunkPos][pos] = PlayerMovement.instance.mouseLook.selectedCube;
                 UpdateChunkMesh();
             }
