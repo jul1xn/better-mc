@@ -2022,7 +2022,7 @@ MonoBehaviour:
   worldMaxHeight: 200
   noiseScale: 0.007
   player: {fileID: 1070714331}
-  debugDraw: 1
+  debugDraw: 0
   type: 0
   activeThreads: 0
   maxConcurrentThreads: 10

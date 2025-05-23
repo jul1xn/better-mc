@@ -240,76 +240,67 @@ public class WorldGen : MonoBehaviour
 
     private void ProcessStagedChunks()
     {
-        if (stagedChunks.Count > 0)
+        int processed = 0;
+
+        while (processed < chunksProcessedPerFrame && stagedChunks.TryDequeue(out StagedChunk stagedChunk))
         {
-            int processed = 0;
-            while (processed < chunksProcessedPerFrame && stagedChunks.TryDequeue(out StagedChunk stagedChunk))
+            Vector2 chunkPos = stagedChunk.chunkPosition;
+            if (loadedChunks.ContainsKey(chunkPos))
             {
-                if (loadedChunks.ContainsKey(stagedChunk.chunkPosition))
-                {
-                    UnityEngine.Debug.LogWarning($"Chunk {stagedChunk.chunkPosition} is already loaded, skipping generation.");
-                    return;
-                }
-
-                string positionString = $"{stagedChunk.chunkPosition.x};{stagedChunk.chunkPosition.y}";
-
-                GameObject chunk = new GameObject();
-                chunk.transform.parent = transform;
-                chunk.layer = gameObject.layer;
-                Chunk c = chunk.AddComponent<Chunk>();
-                c.cubes = stagedChunk.cubePositions;
-                c._chunkPos = WorldSave.ConvertVector2ToString(stagedChunk.chunkPosition);
-
-                Mesh mesh = new Mesh();
-                mesh.vertices = stagedChunk.vertices;
-                mesh.triangles = stagedChunk.triangles;
-                mesh.uv = stagedChunk.uvs;
-                mesh.RecalculateNormals();
-
-
-                MeshCollider meshCollider = chunk.GetComponent<MeshCollider>();
-                if (meshCollider == null)
-                {
-                    meshCollider = chunk.AddComponent<MeshCollider>();
-                }
-
-                MeshFilter meshFilter = chunk.GetComponent<MeshFilter>();
-                if (meshFilter == null)
-                {
-                    meshFilter = chunk.AddComponent<MeshFilter>();
-                }
-
-                MeshRenderer rend = chunk.GetComponent<MeshRenderer>();
-                if (rend == null)
-                {
-                    rend = chunk.AddComponent<MeshRenderer>();
-                    rend.material = sharedMaterial;
-                }
-
-                foreach(var kvp in stagedChunk.lightLevels)
-                {
-                    Light l = Instantiate(lightPrefab, kvp.Key, Quaternion.identity).GetComponent<Light>();
-                    l.transform.parent = chunk.transform;
-                }
-
-
-                meshFilter.sharedMesh = mesh;
-                meshCollider.sharedMesh = mesh;
-                loadedChunks[stagedChunk.chunkPosition] = chunk;
-                processed++;
-
-                if (GameObject.Find(positionString) != null)
-                {
-                    Destroy(GameObject.Find(positionString));
-                }
-
-                chunk.name = positionString;
+                LogWarning($"[ProcessStagedChunks] Chunk {chunkPos} already loaded, skipping.");
+                continue;
             }
+
+            string chunkName = $"{chunkPos.x};{chunkPos.y}";
+
+            GameObject chunkObj = new GameObject(chunkName)
+            {
+                layer = gameObject.layer,
+                transform = { parent = transform }
+            };
+
+            MeshFilter meshFilter = chunkObj.AddComponent<MeshFilter>();
+            MeshRenderer renderer = chunkObj.AddComponent<MeshRenderer>();
+            MeshCollider collider = chunkObj.AddComponent<MeshCollider>();
+            Chunk chunk = chunkObj.AddComponent<Chunk>();
+
+            chunk._chunkPos = WorldSave.ConvertVector2ToString(chunkPos);
+            chunk.cubes = stagedChunk.cubePositions;
+
+            Mesh mesh = new Mesh
+            {
+                vertices = stagedChunk.vertices,
+                triangles = stagedChunk.triangles,
+                uv = stagedChunk.uvs
+            };
+            mesh.RecalculateNormals();
+
+            meshFilter.sharedMesh = mesh;
+            collider.sharedMesh = mesh;
+            renderer.material = sharedMaterial;
+
+            foreach (var kvp in stagedChunk.lightLevels)
+            {
+                GameObject lightObj = Instantiate(lightPrefab, kvp.Key, Quaternion.identity, chunkObj.transform);
+                lightObj.name = $"Light_{kvp.Key}";
+            }
+
+            loadedChunks[chunkPos] = chunkObj;
+            processed++;
+
+            GameObject old = GameObject.Find(chunkName);
+            if (old != null && old != chunkObj)
+            {
+                Destroy(old);
+            }
+
+            Log($"[ProcessStagedChunks] Chunk {chunkName} added successfully.");
         }
     }
 
+
     public int activeThreads = 0;
-    public int maxConcurrentThreads = 2; // Tune this number based on performance
+    public int maxConcurrentThreads = 2;
 
     private void GenerateChunk(Vector2 chunkPos)
     {
@@ -337,8 +328,6 @@ public class WorldGen : MonoBehaviour
                 int height = Mathf.RoundToInt(noiseValue * maxHeight);
                 int stoneHeight = (int)(height * 0.85f);
 
-                Log($"[ChunkThread] Noise at ({x}, {z}): {noiseValue}, height: {height}, stoneHeight: {stoneHeight}");
-
                 for (int y = -30; y < height; y++)
                 {
                     Vector3 pos = new Vector3(x, y, z);
@@ -346,7 +335,7 @@ public class WorldGen : MonoBehaviour
                     float caveNoise = Get3DNoise(x, y + 30, z);
                     if (caveNoise < caveThreshold)
                     {
-                        continue; // Skip block to make a cave
+                        continue;
                     }
 
                     if (y <= stoneHeight)
@@ -359,8 +348,7 @@ public class WorldGen : MonoBehaviour
 
                 cubes[new Vector3(x, -31, z)] = 9;
 
-
-                System.Random rng = new System.Random((int)(seed + x * 73856093 + z * 19349663)); // Unique seed per chunk
+                System.Random rng = new System.Random((int)(seed + x * 73856093 + z * 19349663));
                 foreach (Structure s in BlocksManager.Instance.allStructures)
                 {
                     Vector3 basePos = new Vector3(x, height, z);
@@ -370,13 +358,6 @@ public class WorldGen : MonoBehaviour
                         foreach (StructureBlock block in s.blocks)
                         {
                             Vector3 targetPos = basePos + block.relativePosition;
-
-                            //if (targetPos.x < chunkPos.x || targetPos.x >= chunkPos.x + chunkSize ||
-                            //    targetPos.z < chunkPos.y || targetPos.z >= chunkPos.y + chunkSize)
-                            //{
-                            //    continue;
-                            //}
-
                             cubes[targetPos] = block.blockId;
                         }
                     }
@@ -390,67 +371,88 @@ public class WorldGen : MonoBehaviour
         string chunkKey = WorldSave.ConvertVector2ToString(chunkPos);
         if (modifiedBlockCopy.TryGetValue(chunkKey, out var modifications))
         {
-            Log($"[ChunkThread] Chunk {chunkPos} is modified");
             var localCopy = new Dictionary<string, short>(modifications);
-            Log($"[ChunkThread] Modified block count: {localCopy.Count}");
 
             foreach (var kvp in localCopy)
             {
                 Vector3 pos = WorldSave.ConvertStringToVector3(kvp.Key);
-                Log($"[ChunkThread] Modifying block at {pos} to {kvp.Value}");
                 if (kvp.Value == -1)
                 {
-                    // Remove the block (set to air)
                     cubes.Remove(pos);
                 }
                 else
                 {
-                    cubes[pos] = kvp.Value; // Replace or add the block
+                    cubes[pos] = kvp.Value;
                 }
             }
         }
     }
 
-
-    private void ChunkThread(Vector2 chunkPos)
+    private List<(Vector3, Quaternion, int, Vector2, Vector2)> CreateFaces(ref Dictionary<Vector3, short> cubes, ref Dictionary<Vector3, byte> lightLevels, HashSet<Vector3> cubeSet)
     {
-        Log($"[ChunkThread] Starting chunk generation at {chunkPos}");
-        Dictionary<Vector3, short> cubes = new Dictionary<Vector3, short>();
-
-        Log($"[ChunkThread] Calculating terrain height for chunk {chunkPos}");
-
-        GenerateTerrain(chunkPos, ref cubes);
-        ApplyModifiedBlocks(chunkPos, ref cubes);
-
-
-        Log($"[ChunkThread] Starting face detection for chunk {chunkPos}");
         List<(Vector3, Quaternion, int, Vector2, Vector2)> faceData = new List<(Vector3, Quaternion, int, Vector2, Vector2)>();
-        HashSet<Vector3> cubeSet = new HashSet<Vector3>(cubes.Keys);
-        Dictionary<Vector3, byte> lightLevels = new Dictionary<Vector3, byte>();
-         
         foreach (var cube in cubes)
         {
             byte lightLevel = BlocksManager.Instance.GetLightLevel((int)cube.Value);
             CheckFaces(cube.Key, faceData, cubeSet, cubes[cube.Key], lightLevel, lightLevels);
         }
-        Log($"[ChunkThread] Face detection complete. Total faces: {faceData.Count}");
 
-        Log($"[ChunkThread] Generating mesh data for chunk {chunkPos}");
-        (Vector3[], int[], Vector2[]) meshData = GenerateChunkCollider(faceData);
-        Log($"[ChunkThread] Mesh data generated: Vertices: {meshData.Item1.Length}, Triangles: {meshData.Item2.Length}, UVs: {meshData.Item3.Length}");
-
-
-        StagedChunk chunk = new StagedChunk();
-        chunk.lightLevels = lightLevels;
-        chunk.vertices = meshData.Item1;
-        chunk.triangles = meshData.Item2;
-        chunk.uvs = meshData.Item3;
-        chunk.chunkPosition = chunkPos;
-        chunk.cubePositions = cubes;
-
-        stagedChunks.Enqueue(chunk);
-        Log($"[ChunkThread] Chunk {chunkPos} enqueued for rendering");
+        return faceData;
     }
+
+
+    private void ChunkThread(Vector2 chunkPos)
+    {
+        Log($"[ChunkThread] Started for chunk {chunkPos}");
+
+        try
+        {
+            Dictionary<Vector3, short> cubes = new Dictionary<Vector3, short>();
+            HashSet<Vector3> cubeSet;
+            Dictionary<Vector3, byte> lightLevels = new Dictionary<Vector3, byte>();
+
+            Log($"[ChunkThread] Generating terrain...");
+            GenerateTerrain(chunkPos, ref cubes);
+            Log($"[ChunkThread] Terrain generation complete. Total blocks: {cubes.Count}");
+
+            Log($"[ChunkThread] Applying modified blocks...");
+            ApplyModifiedBlocks(chunkPos, ref cubes);
+            Log($"[ChunkThread] Modifications applied. Total blocks after mods: {cubes.Count}");
+
+            cubeSet = new HashSet<Vector3>(cubes.Keys);
+
+            Log($"[ChunkThread] Creating faces...");
+            List<(Vector3, Quaternion, int, Vector2, Vector2)> faceData = CreateFaces(ref cubes, ref lightLevels, cubeSet);
+            Log($"[ChunkThread] Face data created. Face count: {faceData.Count}");
+
+            Log($"[ChunkThread] Generating mesh data...");
+            (Vector3[] verts, int[] tris, Vector2[] uvs) = GenerateChunkCollider(faceData);
+            Log($"[ChunkThread] Mesh generated. Verts: {verts.Length}, Tris: {tris.Length}, UVs: {uvs.Length}");
+
+            StagedChunk chunk = new StagedChunk
+            {
+                lightLevels = lightLevels,
+                vertices = verts,
+                triangles = tris,
+                uvs = uvs,
+                chunkPosition = chunkPos,
+                cubePositions = cubes
+            };
+
+            stagedChunks.Enqueue(chunk);
+            Log($"[ChunkThread] Chunk {chunkPos} enqueued for main thread processing.");
+        }
+
+        catch (Exception ex)
+        {
+            UnityEngine.Debug.LogError($"[ChunkThread ERROR] Chunk {chunkPos}: {ex.Message}\n{ex.StackTrace}");
+        }
+        finally
+        {
+            Log($"[ChunkThread] Finished chunk {chunkPos}");
+        }
+    }
+
 
 
     public void CheckFaces(Vector3 cubePosition, List<(Vector3, Quaternion, int, Vector2, Vector2)> faceData, HashSet<Vector3> cubes, short blockId, byte lightLevel, Dictionary<Vector3, byte> lightLevelData)
@@ -475,10 +477,10 @@ public class WorldGen : MonoBehaviour
                 Vector2 uvBase = textureAtlas[textureIndex];
 
                 faceData.Add((cubePosition + direction * 0.5f, rotation, blockId, uvBase, new Vector2(1, 1)));
-                //if (lightLevel > 0)
-                //{
-                //    lightLevelData[cubePosition + direction * 0.7f] = lightLevel;
-                //}
+                if (lightLevel > 0)
+                {
+                    lightLevelData[cubePosition + direction * 0.7f] = lightLevel;
+                }
             }
         }
     }
@@ -506,11 +508,11 @@ public class WorldGen : MonoBehaviour
             int index = vertices.Count;
             Vector3[] baseVertices =
             {
-            new Vector3(-0.5f, -0.5f, 0),
-            new Vector3(0.5f, -0.5f, 0),
-            new Vector3(0.5f, 0.5f, 0),
-            new Vector3(-0.5f, 0.5f, 0)
-        };
+                new Vector3(-0.5f, -0.5f, 0),
+                new Vector3(0.5f, -0.5f, 0),
+                new Vector3(0.5f, 0.5f, 0),
+                new Vector3(-0.5f, 0.5f, 0)
+            };
 
             for (int i = 0; i < baseVertices.Length; i++)
             {
@@ -531,7 +533,18 @@ public class WorldGen : MonoBehaviour
 
     public void Log(string msg)
     {
-        //UnityEngine.Debug.Log("[WorldGen] " + msg);
+        if (debugDraw)
+        {
+            UnityEngine.Debug.Log("[WorldGen] " + msg);
+        }
+    }
+
+    public void LogWarning(string msg)
+    {
+        if (debugDraw)
+        {
+            UnityEngine.Debug.LogWarning("[WorldGen] " + msg);
+        }
     }
 }
 
