@@ -60,6 +60,22 @@ public static class Helper
         return $"{position.x};{position.y}";
     }
 
+    public static string ConvertShortListVec2ToString(short[] position)
+    {
+        return $"{position[0]};{position[1]}";
+    }
+
+    public static string ConvertShortListVec3ToString(short[] position)
+    {
+        return $"{position[0]};{position[1]};{position[2]}";
+    }
+
+    public static short[] ConvertStringToShortListVec3(string value)
+    {
+        string[] lines = value.Split(';');
+        return new short[] { short.Parse(lines[0]), short.Parse(lines[1]), short.Parse(lines[2]) };
+    }
+
     public static string ConvertVector3ToString(Vector3 position)
     {
         return $"{position.x};{position.y};{position.z}";
@@ -85,5 +101,44 @@ public static class Helper
     public static Vector3 ShortListToVector3(short[] value)
     {
         return new Vector3(value[0], value[1], value[2]);
+    }
+
+    public static short[] Vector2ToShortList(Vector2 value)
+    {
+        return new short[] { (short)value.x, (short)value.y };
+    }
+
+    public static Vector2 ShortListToVector2(short[] value)
+    {
+        return new Vector2(value[0], value[1]);
+    }
+
+    public static short[] ShortListVec3Add(short[] vec1, short[] vec2)
+    {
+        return new short[]
+        {
+            (short)(vec1[0] + vec2[0]),
+            (short)(vec1[1] + vec2[1]),
+            (short)(vec1[2] + vec2[2])
+        };
+    }
+
+    public static short[] ShortListVec3Multiply(short[] vec1, short multipler)
+    {
+        return new short[]
+        {
+            (short)(vec1[0] * multipler),
+            (short)(vec1[1] * multipler),
+            (short)(vec1[2] * multipler)
+        };
+    }
+
+    public static short[] ShortListVec2Add(short[] vec1, short[] vec2)
+    {
+        return new short[]
+        {
+            (short)(vec1[0] + vec2[0]),
+            (short)(vec1[1] + vec2[1])
+        };
     }
 }

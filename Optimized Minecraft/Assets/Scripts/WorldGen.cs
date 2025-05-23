@@ -33,7 +33,7 @@ public class WorldGen : MonoBehaviour
     public bool debugDraw = false;
     System.Random randomNumber = new System.Random();
 
-    public Dictionary<Vector2, GameObject> loadedChunks = new Dictionary<Vector2, GameObject>();
+    public Dictionary<short[], GameObject> loadedChunks = new Dictionary<short[], GameObject>();
     private Vector2 lastPlayerChunk;
     private int atlasWidth;
     public Dictionary<short, Vector2> textureAtlas = new Dictionary<short, Vector2>();
@@ -158,11 +158,11 @@ public class WorldGen : MonoBehaviour
 
     private void UnloadDistantChunks()
     {
-        List<Vector2> chunksToRemove = new List<Vector2>();
+        List<short[]> chunksToRemove = new List<short[]>();
 
         foreach (var chunk in loadedChunks)
         {
-            float distance = Vector2.Distance(chunk.Key, lastPlayerChunk);
+            float distance = Vector2.Distance(Helper.ShortListToVector2(chunk.Key), lastPlayerChunk);
 
             if (distance > (chunkRendDistance * chunkSize) && loadedChunks[chunk.Key] != null)
             {
@@ -185,13 +185,13 @@ public class WorldGen : MonoBehaviour
     private void LoadChunksAroundPlayer()
     {
         if (type == WorldType.Debug) { return; }
-        List<Vector2> newChunks = new List<Vector2>();
+        List<short[]> newChunks = new List<short[]>();
 
         for (int x = -chunkRendDistance/2; x <= chunkRendDistance/2; x++)
         {
             for (int z = -chunkRendDistance/2; z <= chunkRendDistance/2; z++)
             {
-                Vector2 chunkPos = lastPlayerChunk + new Vector2(x * chunkSize, z * chunkSize);
+                short[] chunkPos = Helper.ShortListVec2Add(Helper.Vector2ToShortList(lastPlayerChunk), new short[] { (short)(x * chunkSize), (short)(z * chunkSize) });
                 if (!loadedChunks.ContainsKey(chunkPos))
                 {
                     newChunks.Add(chunkPos);
@@ -199,7 +199,7 @@ public class WorldGen : MonoBehaviour
             }
         }
 
-        newChunks.Sort((a, b) => Vector2.Distance(a, lastPlayerChunk).CompareTo(Vector2.Distance(b, lastPlayerChunk)));
+        newChunks.Sort((a, b) => Vector2.Distance(Helper.ShortListToVector2(a), lastPlayerChunk).CompareTo(Vector2.Distance(Helper.ShortListToVector2(b), lastPlayerChunk)));
 
         foreach (var chunkPos in newChunks)
         {
@@ -244,14 +244,14 @@ public class WorldGen : MonoBehaviour
 
         while (processed < chunksProcessedPerFrame && stagedChunks.TryDequeue(out StagedChunk stagedChunk))
         {
-            Vector2 chunkPos = stagedChunk.chunkPosition;
+            short[] chunkPos = stagedChunk.chunkPosition;
             if (loadedChunks.ContainsKey(chunkPos))
             {
                 LogWarning($"[ProcessStagedChunks] Chunk {chunkPos} already loaded, skipping.");
                 continue;
             }
 
-            string chunkName = $"{chunkPos.x};{chunkPos.y}";
+            string chunkName = $"{chunkPos[0]};{chunkPos[0]}";
 
             GameObject chunkObj = new GameObject(chunkName)
             {
@@ -264,7 +264,7 @@ public class WorldGen : MonoBehaviour
             MeshCollider collider = chunkObj.AddComponent<MeshCollider>();
             Chunk chunk = chunkObj.AddComponent<Chunk>();
 
-            chunk._chunkPos = Helper.ConvertVector2ToString(chunkPos);
+            chunk._chunkPos = Helper.ConvertShortListVec2ToString(chunkPos);
             chunk.cubes = stagedChunk.cubePositions;
 
             Mesh mesh = new Mesh
@@ -302,7 +302,7 @@ public class WorldGen : MonoBehaviour
     public int activeThreads = 0;
     public int maxConcurrentThreads = 2;
 
-    private void GenerateChunk(Vector2 chunkPos)
+    private void GenerateChunk(short[] chunkPos)
     {
         if (loadedChunks.ContainsKey(chunkPos))
         {
@@ -318,11 +318,11 @@ public class WorldGen : MonoBehaviour
         });
     }
 
-    private void GenerateTerrain(Vector2 chunkPos, ref Dictionary<Vector3, short> cubes)
+    private void GenerateTerrain(short[] chunkPos, ref Dictionary<short[], short> cubes)
     {
-        for (int x = (int)chunkPos.x; x < chunkPos.x + chunkSize; x++)
+        for (int x = (int)chunkPos[0]; x < chunkPos[0] + chunkSize; x++)
         {
-            for (int z = (int)chunkPos.y; z < chunkPos.y + chunkSize; z++)
+            for (int z = (int)chunkPos[1]; z < chunkPos[1] + chunkSize; z++)
             {
                 float noiseValue = GetNoise(seed, x * noiseScale, z * noiseScale);
                 int height = Mathf.RoundToInt(noiseValue * maxHeight);
@@ -330,7 +330,7 @@ public class WorldGen : MonoBehaviour
 
                 for (int y = -30; y < height; y++)
                 {
-                    Vector3 pos = new Vector3(x, y, z);
+                    short[] pos = new short[] { (short)x, (short)y, (short)z };
 
                     float caveNoise = Get3DNoise(x, y + 30, z);
                     if (caveNoise < caveThreshold)
@@ -346,18 +346,18 @@ public class WorldGen : MonoBehaviour
                         cubes[pos] = dirtBlock;
                 }
 
-                cubes[new Vector3(x, -31, z)] = 9;
+                cubes[new short[] { (short)x, -31, (short)z }] = 9;
 
                 System.Random rng = new System.Random((int)(seed + x * 73856093 + z * 19349663));
                 foreach (Structure s in BlocksManager.Instance.allStructures)
                 {
-                    Vector3 basePos = new Vector3(x, height, z);
+                    short[] basePos = new short[] { (short)x, (short)height, (short)z };
 
-                    if (rng.Next(s.commonness) == 0 && cubes.ContainsKey(new Vector3(x, height - 1, z)))
+                    if (rng.Next(s.commonness) == 0 && cubes.ContainsKey(new short[] { (short)x, (short)(height - 1), (short)z }))
                     {
                         foreach (StructureBlock block in s.blocks)
                         {
-                            Vector3 targetPos = basePos + block.relativePosition;
+                            short[] targetPos = Helper.ShortListVec3Add(basePos, Helper.Vector3ToShortList(block.relativePosition));
                             cubes[targetPos] = block.blockId;
                         }
                     }
@@ -366,16 +366,16 @@ public class WorldGen : MonoBehaviour
         }
     }
 
-    private void ApplyModifiedBlocks(Vector2 chunkPos, ref Dictionary<Vector3, short> cubes)
+    private void ApplyModifiedBlocks(short[] chunkPos, ref Dictionary<short[], short> cubes)
     {
-        string chunkKey = Helper.ConvertVector2ToString(chunkPos);
+        string chunkKey = Helper.ConvertShortListVec2ToString(chunkPos);
         if (modifiedBlockCopy.TryGetValue(chunkKey, out var modifications))
         {
             var localCopy = new Dictionary<string, short>(modifications);
 
             foreach (var kvp in localCopy)
             {
-                Vector3 pos = Helper.ConvertStringToVector3(kvp.Key);
+                short[] pos = Helper.ConvertStringToShortListVec3(kvp.Key);
                 if (kvp.Value == -1)
                 {
                     cubes.Remove(pos);
@@ -388,7 +388,7 @@ public class WorldGen : MonoBehaviour
         }
     }
 
-    private List<(Vector3, Quaternion, int, Vector2, Vector2)> CreateFaces(ref Dictionary<Vector3, short> cubes, ref Dictionary<Vector3, byte> lightLevels, HashSet<Vector3> cubeSet)
+    private List<(Vector3, Quaternion, int, Vector2, Vector2)> CreateFaces(ref Dictionary<short[], short> cubes, ref Dictionary<Vector3, byte> lightLevels, HashSet<short[]> cubeSet)
     {
         List<(Vector3, Quaternion, int, Vector2, Vector2)> faceData = new List<(Vector3, Quaternion, int, Vector2, Vector2)>();
         foreach (var cube in cubes)
@@ -401,7 +401,7 @@ public class WorldGen : MonoBehaviour
     }
 
 
-    private void ChunkThread(Vector2 chunkPos)
+    private void ChunkThread(short[] chunkPos)
     {
         Stopwatch sw = new Stopwatch();
         long terrainTime, modTime, faceTime, meshTime, totalTime;
@@ -409,9 +409,9 @@ public class WorldGen : MonoBehaviour
         try
         {
             sw.Start();
-            Dictionary<Vector3, short> cubes = new Dictionary<Vector3, short>();
+            Dictionary<short[], short> cubes = new Dictionary<short[], short>();
             Dictionary<Vector3, byte> lightLevels = new Dictionary<Vector3, byte>();
-            HashSet<Vector3> cubeSet;
+            HashSet<short[]> cubeSet;
 
             GenerateTerrain(chunkPos, ref cubes);
             sw.Stop();
@@ -423,7 +423,7 @@ public class WorldGen : MonoBehaviour
             modTime = sw.ElapsedMilliseconds;
 
             sw.Restart();
-            cubeSet = new HashSet<Vector3>(cubes.Keys);
+            cubeSet = new HashSet<short[]>(cubes.Keys);
             var faceData = CreateFaces(ref cubes, ref lightLevels, cubeSet);
             sw.Stop();
             faceTime = sw.ElapsedMilliseconds;
@@ -449,7 +449,7 @@ public class WorldGen : MonoBehaviour
             stagedChunks.Enqueue(chunk);
 
             // Write CSV entry
-            string csvLine = $"{chunkPos.x},{chunkPos.y},{terrainTime},{modTime},{faceTime},{meshTime},{totalTime}";
+            string csvLine = $"{chunkPos[0]},{chunkPos[1]},{terrainTime},{modTime},{faceTime},{meshTime},{totalTime}";
             WriteTimingToCsv(csvLine);
         }
         catch (Exception ex)
@@ -475,31 +475,31 @@ public class WorldGen : MonoBehaviour
     }
 
 
-    public void CheckFaces(Vector3 cubePosition, List<(Vector3, Quaternion, int, Vector2, Vector2)> faceData, HashSet<Vector3> cubes, short blockId, byte lightLevel, Dictionary<Vector3, byte> lightLevelData)
+    public void CheckFaces(short[] cubePosition, List<(Vector3, Quaternion, int, Vector2, Vector2)> faceData, HashSet<short[]> cubes, short blockId, byte lightLevel, Dictionary<Vector3, byte> lightLevelData)
     {
         Block block = BlocksManager.Instance.allBlocks[blockId];
 
-        (Vector3 direction, Quaternion rotation, string face)[] checks =
+        (short[] direction, Quaternion rotation, string face)[] checks =
             {
-            (Vector3.forward, Quaternion.identity, "front"),
-            (Vector3.back, Quaternion.Euler(0, 180, 0), "back"),
-            (Vector3.right, Quaternion.Euler(0, 90, 0), "right"),
-            (Vector3.left, Quaternion.Euler(0, -90, 0), "left"),
-            (Vector3.down, Quaternion.Euler(90, 0, 0), "bottom"),
-            (Vector3.up, Quaternion.Euler(-90, 0, 0), "top")
+            (Helper.Vector3ToShortList(Vector3.forward), Quaternion.identity, "front"),
+            (Helper.Vector3ToShortList(Vector3.back), Quaternion.Euler(0, 180, 0), "back"),
+            (Helper.Vector3ToShortList(Vector3.right), Quaternion.Euler(0, 90, 0), "right"),
+            (Helper.Vector3ToShortList(Vector3.left), Quaternion.Euler(0, -90, 0), "left"),
+            (Helper.Vector3ToShortList(Vector3.down), Quaternion.Euler(90, 0, 0), "bottom"),
+            (Helper.Vector3ToShortList(Vector3.up), Quaternion.Euler(-90, 0, 0), "top")
         };
 
         foreach (var (direction, rotation, face) in checks)
         {
-            if (!cubes.Contains(cubePosition + direction))
+            if (!cubes.Contains(Helper.ShortListVec3Add(cubePosition, direction)))
             {
                 short textureIndex = BlocksManager.GetTextureIndexForFace(block, face);
                 Vector2 uvBase = textureAtlas[textureIndex];
 
-                faceData.Add((cubePosition + direction * 0.5f, rotation, blockId, uvBase, new Vector2(1, 1)));
+                faceData.Add((Helper.ShortListToVector3(cubePosition) + Helper.ShortListToVector3(direction) * 0.5f, rotation, blockId, uvBase, new Vector2(1, 1)));
                 if (lightLevel > 0)
                 {
-                    lightLevelData[cubePosition + direction * 0.7f] = lightLevel;
+                    lightLevelData[Helper.ShortListToVector3(cubePosition) + Helper.ShortListToVector3(direction) * 0.7f] = lightLevel;
                 }
             }
         }
@@ -576,9 +576,9 @@ public class WorldGen : MonoBehaviour
 [Serializable]
 public class StagedChunk
 {
-    public Vector2 chunkPosition;
+    public short[] chunkPosition;
     public Dictionary<Vector3, byte> lightLevels;
-    public Dictionary<Vector3, short> cubePositions;
+    public Dictionary<short[], short> cubePositions;
     public Vector3[] vertices;
     public int[] triangles;
     public Vector2[] uvs;
