@@ -150,7 +150,7 @@ public class Chunk : MonoBehaviour
             if (!cubes.ContainsKey(newBlockPos))
             {
                 cubes[newBlockPos] = PlayerMovement.instance.mouseLook.selectedCube;
-                string pos = Helper.ConvertShortListVec3ToString(newBlockPos);
+                string pos = Helper.ConvertVector3ToString(newBlockPos);
                 LevelController.instance.t_worldsave.modifiedChunks[_chunkPos][pos] = PlayerMovement.instance.mouseLook.selectedCube;
                 UpdateChunkMesh();
             }
@@ -165,10 +165,10 @@ public class Chunk : MonoBehaviour
         List<Vector2> uvs = new List<Vector2>();
         Dictionary<Vector3, byte> lightLevels = new Dictionary<Vector3, byte>();
 
-        HashSet<short[]> cubeSet = new HashSet<short[]>(cubes.Keys);
+        HashSet<Vector3> cubeSet = new HashSet<Vector3>(cubes.Keys);
         List<(Vector3, Quaternion, int, Vector2, Vector2)> faceData = new List<(Vector3, Quaternion, int, Vector2, Vector2)>();
 
-        foreach (KeyValuePair<short[], short> cube in cubes)
+        foreach (KeyValuePair<Vector3, short> cube in cubes)
         {
             byte lightLevel = BlocksManager.Instance.GetLightLevel((int)cube.Value);
             WorldGen.instance.CheckFaces(cube.Key, faceData, cubeSet, cube.Value, lightLevel, lightLevels);
