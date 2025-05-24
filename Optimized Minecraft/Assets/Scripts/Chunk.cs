@@ -59,8 +59,6 @@ public class Chunk : MonoBehaviour
         Gizmos.DrawWireSphere(pos2, .25f);
     }
 
-
-
     private void Update()
     {
         Vector3 playerPosition = PlayerMovement.instance.transform.position;
@@ -73,10 +71,12 @@ public class Chunk : MonoBehaviour
             return;
         }
 
-        Bounds bounds = GetComponent<Renderer>().bounds;
-
-        Vector3[] worldCorners = new Vector3[]
+        if (LevelController.instance.s_frustumCulling)
         {
+            Bounds bounds = rend.bounds;
+
+            Vector3[] worldCorners = new Vector3[]
+            {
             bounds.min,
             bounds.max,
             new Vector3(bounds.min.x, bounds.min.y, bounds.max.z),
@@ -85,26 +85,24 @@ public class Chunk : MonoBehaviour
             new Vector3(bounds.max.x, bounds.max.y, bounds.min.z),
             new Vector3(bounds.max.x, bounds.min.y, bounds.max.z),
             new Vector3(bounds.min.x, bounds.max.y, bounds.max.z)
-        };
+            };
 
-        bool isVisible = false;
-        foreach (Vector3 corner in worldCorners)
-        {
-            Vector3 viewportPos = Camera.main.WorldToViewportPoint(corner);
-            if (viewportPos.z > 0 && viewportPos.x >= 0 && viewportPos.x <= 1 && viewportPos.y >= 0 && viewportPos.y <= 1)
+            bool isVisible = false;
+            foreach (Vector3 corner in worldCorners)
             {
-                isVisible = true;
-                break;
+                Vector3 viewportPos = Camera.main.WorldToViewportPoint(corner);
+                if (viewportPos.z > 0 && viewportPos.x >= 0 && viewportPos.x <= 1 && viewportPos.y >= 0 && viewportPos.y <= 1)
+                {
+                    isVisible = true;
+                    break;
+                }
             }
-        }
 
-        if (WorldGen.instance.type == WorldType.Amplified || !LevelController.instance.s_frustumCulling)
-        {
-            rend.enabled = true;
+            rend.enabled = isVisible;
         }
         else
         {
-            rend.enabled = isVisible;
+            rend.enabled = true;
         }
     }
 

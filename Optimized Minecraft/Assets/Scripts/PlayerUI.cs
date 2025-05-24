@@ -67,6 +67,19 @@ public class PlayerUI : MonoBehaviour
             GUILayout.Label($"Child count: {WorldGen.instance.transform.childCount}", options);
             GUILayout.Label($"Staged chunks: {WorldGen.instance.stagedChunks.Count}", options);
             GUILayout.Label($"Active threads: {WorldGen.instance.activeThreads}", options);
+            GUILayout.Label("", options);
+            GUILayout.Label($"Chunk count: {WorldGen.instance.transform.childCount}", options);
+
+            int count = 0;
+            foreach(Transform child in WorldGen.instance.transform)
+            {
+                if (!child.GetComponent<MeshRenderer>().enabled)
+                {
+                    count++;
+                }
+            }
+
+            GUILayout.Label($"Culled chunks: {count}", options);
         }
     }
 
