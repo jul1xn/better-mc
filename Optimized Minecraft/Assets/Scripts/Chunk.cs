@@ -12,12 +12,12 @@ public class Chunk : MonoBehaviour
     public float distance;
     public float destroyDistance;
     Vector3 chunkCenter;
-    public Dictionary<short[], short> cubes;
+    public Dictionary<Vector3, short> cubes;
     public string _chunkPos;
     public Vector2 _chunk;
 
-    short[] pos1;
-    short[] pos2;
+    Vector3 pos1;
+    Vector3 pos2;
 
     private void Start()
     {
@@ -54,9 +54,9 @@ public class Chunk : MonoBehaviour
         Gizmos.DrawWireCube(bounds.center, bounds.size);
 
         Gizmos.color = Color.blue;
-        Gizmos.DrawWireSphere(Helper.ShortListToVector3(pos1), .25f);
+        Gizmos.DrawWireSphere(pos1, .25f);
         Gizmos.color = Color.green;
-        Gizmos.DrawWireSphere(Helper.ShortListToVector3(pos2), .25f);
+        Gizmos.DrawWireSphere(pos2, .25f);
     }
 
 
@@ -116,15 +116,15 @@ public class Chunk : MonoBehaviour
         }
 
         Vector3 hitPosition = hit.point - hit.normal * 0.1f; // Slight offset to prevent floating point issues
-        short[] blockPos = new short[] { (short)Mathf.Floor(hitPosition.x), (short)Mathf.Floor(hitPosition.y), (short)Mathf.Floor(hitPosition.z) };
+        Vector3 blockPos = new Vector3(Mathf.Floor(hitPosition.x), Mathf.Floor(hitPosition.y), Mathf.Floor(hitPosition.z));
 
         // Find the closest existing cube position
         if (cubes.Count > 0)
         {
-            blockPos = cubes.Keys.OrderBy(pos => Vector3.Distance(Helper.ShortListToVector3(pos), hitPosition)).First();
+            blockPos = cubes.Keys.OrderBy(pos => Vector3.Distance(pos, hitPosition)).First();
         }
 
-        pos1 = Helper.Vector3ToShortList(hitPosition);
+        pos1 = hitPosition;
         pos2 = blockPos;
 
         if (!isPlacing)
@@ -137,7 +137,7 @@ public class Chunk : MonoBehaviour
                     return;
                 }
 
-                string pos = Helper.ConvertShortListVec3ToString(blockPos);
+                string pos = Helper.ConvertVector3ToString(blockPos);
                 LevelController.instance.t_worldsave.modifiedChunks[_chunkPos][pos] = -1;
                 cubes.Remove(blockPos);
                 UpdateChunkMesh();
@@ -146,7 +146,7 @@ public class Chunk : MonoBehaviour
         else
         {
             // Place a new block at the adjacent position
-            short[] newBlockPos = Helper.ShortListVec3Add(blockPos, Helper.Vector3ToShortList(hit.normal));
+            Vector3 newBlockPos = blockPos + hit.normal;
             if (!cubes.ContainsKey(newBlockPos))
             {
                 cubes[newBlockPos] = PlayerMovement.instance.mouseLook.selectedCube;
