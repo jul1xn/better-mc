@@ -85,7 +85,7 @@ public class PlayerMovement : MonoBehaviour
             multiplier = 4.5f;
         }
 
-        if (PlayerUI.instance.inUI)
+        if (PlayerUI.instance.inUI || PlayerUI.instance.gamePaused)
         {
             x = 0;
             z = 0;
@@ -137,7 +137,7 @@ public class PlayerMovement : MonoBehaviour
             multiplier = 1.3f;
         }
 
-        if (PlayerUI.instance.inUI)
+        if (PlayerUI.instance.inUI || PlayerUI.instance.gamePaused)
         {
             x = 0;
             z = 0;
@@ -153,7 +153,7 @@ public class PlayerMovement : MonoBehaviour
 
         controller.Move(move * (speed * multiplier) * Time.deltaTime);
 
-        if (Input.GetButtonDown("Jump") && isGrounded && !PlayerUI.instance.inUI)
+        if (Input.GetButtonDown("Jump") && isGrounded && !PlayerUI.instance.inUI && !PlayerUI.instance.gamePaused)
         {
             velocity.y = Mathf.Sqrt(jump * -2f * gravity);
         }

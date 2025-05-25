@@ -82,10 +82,16 @@ public class LevelController : MonoBehaviour
         PlayerPrefs.SetInt("s_quality", s_quality);
         PlayerPrefs.SetInt("s_antia", s_antia);
 
-        if (SceneManager.GetActiveScene().buildIndex == 1)
+        if (SceneManager.GetActiveScene().buildIndex == 2)
         {
             SaveWorld();
         }
+    }
+
+    public void SaveAndQuit()
+    {
+        SaveWorld();
+        SceneManager.LoadScene(1);
     }
 
     System.Random r = new System.Random();
@@ -121,7 +127,7 @@ public class LevelController : MonoBehaviour
             t_worldsave.playerRotation = Helper.ConvertVector3ToString(Vector3.zero);
         }
 
-        SceneManager.LoadScene(1);
+        SceneManager.LoadScene(2);
     }
 
     public void SaveWorld()

@@ -7,9 +7,13 @@ using TMPro;
 public class PlayerUI : MonoBehaviour
 {
     public static PlayerUI instance;
+    public GameObject mainUI;
+    public GameObject pauseUI;
+    [Space]
     public bool chatOpen;
     public bool inventoryOpen;
     public bool inUI;
+    public bool gamePaused;
     public TMP_InputField chatInputField;
     public GameObject inventoryUI;
     public GameObject uiPrefab;
@@ -25,10 +29,13 @@ public class PlayerUI : MonoBehaviour
 
     private void Start()
     {
+        mainUI.SetActive(true);
+        pauseUI.SetActive(false);
         inventoryUI.SetActive(false);
         chatInputField.gameObject.SetActive(false);
         inUI = false;
         debugMenu = false;
+        gamePaused = false;
 
         sprites = BlocksManager.Instance.allBlocks.ToArray();
         for (int i = 0; i < sprites.Length; i++)
@@ -52,7 +59,7 @@ public class PlayerUI : MonoBehaviour
 
     private void OnGUI()
     {
-        if (debugMenu)
+        if (debugMenu && !gamePaused)
         {
             GUILayoutOption[] options = new GUILayoutOption[] {
                 GUILayout.Height(20)
@@ -85,12 +92,28 @@ public class PlayerUI : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.F3))
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            gamePaused = !gamePaused;
+            mainUI.SetActive(!mainUI.activeSelf);
+            pauseUI.SetActive(!pauseUI.activeSelf);
+
+            if (gamePaused)
+            {
+                PlayerMovement.instance.mouseLook.UnLockMouse();
+            }
+            else
+            {
+                PlayerMovement.instance.mouseLook.LockMouse();
+            }
+        }
+
+        if (Input.GetKeyDown(KeyCode.F3) && !gamePaused)
         {
             debugMenu = !debugMenu;
         }
 
-        if (Input.GetKeyDown(KeyCode.T) && !chatOpen && !inventoryOpen)
+        if (Input.GetKeyDown(KeyCode.T) && !chatOpen && !inventoryOpen && !gamePaused)
         {
             chatOpen = true;
             inUI = true;
@@ -99,7 +122,7 @@ public class PlayerUI : MonoBehaviour
             chatInputField.gameObject.SetActive(true);
             chatInputField.Select();
         }
-        if (Input.GetKeyDown(KeyCode.E) && !inventoryOpen && !chatOpen)
+        if (Input.GetKeyDown(KeyCode.E) && !inventoryOpen && !chatOpen && !gamePaused)
         {
             inventoryOpen = true;
             inUI = true;
@@ -176,6 +199,27 @@ public class PlayerUI : MonoBehaviour
                 }
             }
 
+        }
+    }
+
+    public void SaveAndQuit()
+    {
+        LevelController.instance.SaveAndQuit();
+    }
+
+    public void Resume()
+    {
+        gamePaused = !gamePaused;
+        mainUI.SetActive(!mainUI.activeSelf);
+        pauseUI.SetActive(!pauseUI.activeSelf);
+
+        if (gamePaused)
+        {
+            PlayerMovement.instance.mouseLook.UnLockMouse();
+        }
+        else
+        {
+            PlayerMovement.instance.mouseLook.LockMouse();
         }
     }
 }
