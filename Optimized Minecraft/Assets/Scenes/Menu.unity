@@ -7680,7 +7680,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   blockPath: Blocks/
   biomePath: Biomes/
-  biomeScale: 0.1
+  biomeScale: 9.99
   allBlocks: []
   allOres: []
   allBiomes: []

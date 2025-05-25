@@ -143,7 +143,7 @@ public class PlayerUI : MonoBehaviour
             if (msgs[0] == "biome")
             {
                 Biome targetBiome = BlocksManager.Instance.GetBiomeByName(msgs[1]);
-                Vector2 targetPos = new Vector2(PlayerMovement.instance.transform.position.x, PlayerMovement.instance.transform.position.z);
+                Vector2 targetPos = new Vector2(Mathf.Round(PlayerMovement.instance.transform.position.x), Mathf.Round(PlayerMovement.instance.transform.position.z));
 
                 Biome foundBiome = null;
                 int maxRadius = 10000;
@@ -156,8 +156,8 @@ public class PlayerUI : MonoBehaviour
                     for (float angle = 0; angle < 360f; angle += 10f)
                     {
                         float rad = angle * Mathf.Deg2Rad;
-                        float x = targetPos.x + Mathf.Cos(rad) * radius * step;
-                        float z = targetPos.y + Mathf.Sin(rad) * radius * step;
+                        float x = Mathf.Round(targetPos.x + Mathf.Cos(rad) * radius * step);
+                        float z = Mathf.Round(targetPos.y + Mathf.Sin(rad) * radius * step);
                         Vector2 checkPos = new Vector2(x, z);
 
                         foundBiome = BlocksManager.Instance.GetBiomeAtPos(checkPos, WorldGen.instance.seed);
