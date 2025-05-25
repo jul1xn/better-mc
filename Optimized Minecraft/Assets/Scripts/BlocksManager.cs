@@ -7,11 +7,10 @@ using UnityEngine;
 public class BlocksManager : MonoBehaviour
 {
     public string blockPath;
-    public string structurePath;
     public string biomePath;
+    public float biomeScale = 0.01f; // Controls biome size — higher scale = larger biomes
     public Block[] allBlocks;
     public Block[] allOres;
-    public Structure[] allStructures;
     public Biome[] allBiomes;
     public static BlocksManager Instance;
 
@@ -30,7 +29,6 @@ public class BlocksManager : MonoBehaviour
     {
         allBlocks = Resources.LoadAll<Block>(blockPath);
         allOres = allBlocks.Where(x => x.isOre).ToArray();
-        allStructures = Resources.LoadAll<Structure>(structurePath);
         allBiomes = Resources.LoadAll<Biome>(biomePath);
     }
 
@@ -65,16 +63,27 @@ public class BlocksManager : MonoBehaviour
 
     public Biome GetBiomeAtPos(Vector2 position, float seed)
     {
-        // Create a Perlin noise coordinate based on position and seed to get consistent but varied values
-        float noiseValue = Mathf.PerlinNoise(position.x + seed, position.y + seed);
+        // Scale position down to stretch the noise
+        float noiseX = position.x * biomeScale + seed;
+        float noiseY = position.y * biomeScale + seed;
 
-        // Map noise value (0 to 1) to an index in allBiomes
-        int biomeIndex = Mathf.FloorToInt(noiseValue * allBiomes.Length);
+        float noiseValue = Mathf.PerlinNoise(noiseX, noiseY);
 
-        // Clamp in case noiseValue == 1
-        biomeIndex = Mathf.Clamp(biomeIndex, 0, allBiomes.Length - 1);
+        // Weighted selection
+        float totalWeight = allBiomes.Sum(b => b.commonness);
+        float target = noiseValue * totalWeight;
+        float cumulative = 0f;
 
-        return allBiomes[biomeIndex];
+        foreach (Biome biome in allBiomes)
+        {
+            cumulative += biome.commonness;
+            if (target <= cumulative)
+            {
+                return biome;
+            }
+        }
+
+        return allBiomes.Last();
     }
 
 

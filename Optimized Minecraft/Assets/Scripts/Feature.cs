@@ -1,14 +1,13 @@
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "New Structure", menuName = "Minecraft/Structure")]
-public class Structure : ScriptableObject
+public class Feature : ScriptableObject
 {
-    public int commonness;
-    public StructureBlock[] blocks;
+    public FeatureBlock[] blocks;
 }
 
 [System.Serializable]
-public struct StructureBlock
+public struct FeatureBlock
 {
     public Vector3 relativePosition;
     public short blockId;

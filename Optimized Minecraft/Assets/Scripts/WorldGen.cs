@@ -346,6 +346,7 @@ public class WorldGen : MonoBehaviour
         {
             for (int z = (int)chunkPos.y; z < chunkPos.y + chunkSize; z++)
             {
+                Biome b = BlocksManager.Instance.GetBiomeAtPos(new Vector2(x, z), seed);
                 float noiseValue = GetNoise(seed, x * noiseScale, z * noiseScale);
                 int height = Mathf.RoundToInt(noiseValue * maxHeight);
                 int stoneHeight = (int)(height * 0.85f);
@@ -361,23 +362,24 @@ public class WorldGen : MonoBehaviour
                     }
 
                     if (y <= stoneHeight)
-                        cubes[pos] = stoneBlock;
+                        cubes[pos] = b.stoneBlockId;
                     else if (y == height - 1)
-                        cubes[pos] = grassBlock;
+                        cubes[pos] = b.grassBlockId;
                     else
-                        cubes[pos] = dirtBlock;
+                        cubes[pos] = b.dirtBlockId;
                 }
 
                 cubes[new Vector3(x, -31, z)] = 9;
 
                 System.Random rng = new System.Random((int)(seed + x * 73856093 + z * 19349663));
-                foreach (Structure s in BlocksManager.Instance.allStructures)
+
+                foreach (SpawnableFeature s in b.spawnAbleFeatures)
                 {
                     Vector3 basePos = new Vector3(x, height, z);
 
                     if (rng.Next(s.commonness) == 0 && cubes.ContainsKey(new Vector3(x, height - 1, z)))
                     {
-                        foreach (StructureBlock block in s.blocks)
+                        foreach (FeatureBlock block in s.feature.blocks)
                         {
                             Vector3 targetPos = basePos + block.relativePosition;
                             cubes[targetPos] = block.blockId;

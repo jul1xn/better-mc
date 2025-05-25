@@ -10,16 +10,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: dea7e0e9df672f845aed2bb53560ae4d, type: 3}
-  m_Name: Plains
+  m_Name: Desert
   m_EditorClassIdentifier: 
-  biomeName: Plains
-  commonness: 0.8
-  foiliageColor: {r: 0.46666667, g: 0.67058825, b: 0.18431373, a: 1}
-  grassBlockId: 2
-  dirtBlockId: 1
+  biomeName: Desert
+  commonness: 0.05
+  foiliageColor: {r: 0.68235296, g: 0.6431373, b: 0.16470589, a: 1}
+  grassBlockId: 13
+  dirtBlockId: 14
   stoneBlockId: 0
-  spawnAbleFeatures:
-  - feature: {fileID: 11400000, guid: 38dbb4d68f774f446a036d6de7008ad5, type: 2}
-    commonness: 200
-  - feature: {fileID: 11400000, guid: 9d0d0ca8dfefa22449dde8a632b0c636, type: 2}
-    commonness: 200
+  spawnAbleFeatures: []
