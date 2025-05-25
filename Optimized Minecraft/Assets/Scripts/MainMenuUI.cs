@@ -8,6 +8,7 @@ using TMPro;
 
 public class MainMenuUI : MonoBehaviour
 {
+    public static MainMenuUI Instance;
     public AudioSource clickAudio;
     [Space]
     public GameObject mainUI;
@@ -16,6 +17,7 @@ public class MainMenuUI : MonoBehaviour
     public GameObject worldUI;
     public GameObject multiplayerUI;
     public GameObject createWorldUI;
+    public GameObject dataPackUI;
     [Space]
     public GameObject mpUsernameUI;
     public GameObject mpConnectUI;
@@ -29,6 +31,14 @@ public class MainMenuUI : MonoBehaviour
     public TMP_InputField worldName;
     public GameObject worldPrefab;
     public Transform worldParent;
+    [Space]
+    public GameObject dpPrefab;
+    public Transform dpParent;
+
+    private void Awake()
+    {
+        Instance = this;
+    }
 
     private void Start()
     {
@@ -38,6 +48,7 @@ public class MainMenuUI : MonoBehaviour
         worldUI.SetActive(false);
         multiplayerUI.SetActive(false);
         createWorldUI.SetActive(false);
+        dataPackUI.SetActive(false);
 
         infiniteToggle.isOn = LevelController.instance.w_infiniteWorld;
         worldSize.value = LevelController.instance.w_chunkSize;
@@ -68,11 +79,55 @@ public class MainMenuUI : MonoBehaviour
     public void LoadWorlds()
     {
         DirectoryInfo d = new DirectoryInfo(Application.persistentDataPath + "\\saves\\");
+        foreach(Transform t in worldParent)
+        {
+            Destroy(t.gameObject);
+        }
+
         foreach(var file in d.GetFiles("*.save"))
         {
             GameObject obj = Instantiate(worldPrefab, worldParent);
             obj.GetComponent<World>().Init(file.Name);
         }
+    }
+
+    public void LoadDataPacks()
+    {
+        foreach (Transform t in dpParent)
+        {
+            Destroy(t.gameObject);
+        }
+
+        foreach (DatapackData dp in DataPackManager.Instance.GetDatapacks())
+        {
+            GameObject obj = Instantiate(dpPrefab, dpParent);
+            obj.GetComponent<DataPackUI>().Init(dp);
+        }
+    }
+
+    public void RefreshDataPacks()
+    {
+        BlocksManager.Instance.RefreshDB();
+        LoadDataPacks();
+    }
+
+    public void DownloadExamplePack()
+    {
+        float chance = Random.value;
+
+        if (chance < 0.05f)
+        {
+            Application.OpenURL("https://youtu.be/dQw4w9WgXcQ");
+        }
+        else
+        {
+            Application.OpenURL("https://prowser.nl/downloads/bmc_example_datapack.zip");
+        }
+    }
+
+    public void OpenDPFolder()
+    {
+        System.Diagnostics.Process.Start(Application.persistentDataPath + DataPackManager.dpPath);
     }
 
     public void OpenMultiplayerMenu()

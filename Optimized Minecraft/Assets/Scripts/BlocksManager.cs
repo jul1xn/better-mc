@@ -28,7 +28,6 @@ public class BlocksManager : MonoBehaviour
     public void Start()
     {
         RefreshDB();
-        DataPackManager.Instance.ReloadAllPacks();
     }
 
     public void RefreshDB()
@@ -41,6 +40,8 @@ public class BlocksManager : MonoBehaviour
 
         allBiomes.Clear();
         allBiomes = Resources.LoadAll<Biome>(biomePath).ToList();
+
+        DataPackManager.Instance.ReloadAllPacks();
     }
 
     public short GetBlockByName(string name)

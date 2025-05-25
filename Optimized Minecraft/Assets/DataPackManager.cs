@@ -8,17 +8,33 @@ using Newtonsoft.Json.Linq;
 public class DataPackManager : MonoBehaviour
 {
     public static DataPackManager Instance;
-    private static string dpPath = "\\datapacks\\";
+    public static string dpPath = "\\datapacks\\";
+    public List<string> disabledPacks = new List<string>();
+    private static string ddpPath = "\\disabled_datapacks.json";
 
     private void Awake()
     {
         Instance = this;
+        if (File.Exists(Application.persistentDataPath + ddpPath))
+        {
+            disabledPacks = JsonConvert.DeserializeObject<List<string>>(File.ReadAllText(Application.persistentDataPath + ddpPath));
+        }
+    }
+
+    private void OnApplicationQuit()
+    {
+        File.WriteAllText(Application.persistentDataPath + ddpPath, JsonConvert.SerializeObject(disabledPacks));
     }
 
     public void ReloadAllPacks()
     {
         foreach (var dir in Directory.GetDirectories(Application.persistentDataPath + dpPath))
         {
+            if (disabledPacks.Contains(Path.GetFileName(dir)))
+            {
+                return;
+            }
+
             string biomes = dir + "\\biomes\\";
             string features = dir + "\\features\\";
 
@@ -78,4 +94,30 @@ public class DataPackManager : MonoBehaviour
             }
         }
     }
+
+    public DatapackData[] GetDatapacks()
+    {
+        List<DatapackData> dts = new List<DatapackData>();
+
+        foreach (var dir in Directory.GetDirectories(Application.persistentDataPath + dpPath))
+        {
+            DatapackData data = new DatapackData();
+            data.folder_name = Path.GetFileName(dir);
+            data.biomeCount = Directory.GetFiles(dir + "\\biomes\\").Where(p => p.EndsWith(".json")).Count();
+            data.featureCount = Directory.GetFiles(dir + "\\features\\").Where(p => p.EndsWith(".json")).Count();
+            data.enabled = disabledPacks.Contains(data.folder_name);
+
+            dts.Add(data);
+        }
+
+        return dts.ToArray();
+    }
+}
+
+public struct DatapackData
+{
+    public string folder_name;
+    public int biomeCount;
+    public int featureCount;
+    public bool enabled;
 }
