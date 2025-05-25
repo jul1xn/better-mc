@@ -442,7 +442,7 @@ public class WorldGen : MonoBehaviour
             {
                 shouldAddFace = true;
             }
-            else if (BlocksManager.Instance.IsTransparent(otherCube))
+            else if (BlocksManager.Instance.IsTransparent(otherCube) && !LevelController.instance.s_transparentculling)
             {
                 shouldAddFace = true;
             }

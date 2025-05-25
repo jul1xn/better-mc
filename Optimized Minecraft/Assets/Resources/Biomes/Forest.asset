@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Forest
   m_EditorClassIdentifier: 
   biomeName: Forest
-  commonness: 0.4
+  commonness: 8
   foiliageColor: {r: 0.34901962, g: 0.68235296, b: 0.1882353, a: 1}
   grassBlockId: 2
   dirtBlockId: 1

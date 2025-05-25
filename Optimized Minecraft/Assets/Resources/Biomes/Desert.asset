@@ -13,9 +13,11 @@ MonoBehaviour:
   m_Name: Desert
   m_EditorClassIdentifier: 
   biomeName: Desert
-  commonness: 0.05
+  commonness: 4
   foiliageColor: {r: 0.68235296, g: 0.6431373, b: 0.16470589, a: 1}
   grassBlockId: 13
   dirtBlockId: 14
   stoneBlockId: 0
-  spawnAbleFeatures: []
+  spawnAbleFeatures:
+  - feature: {fileID: 11400000, guid: a098d8d6c1f37b046807e8647d042fd8, type: 2}
+    commonness: 250

@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Rendering.PostProcessing;
 
 public class MouseLook : MonoBehaviour
 {
@@ -10,12 +11,15 @@ public class MouseLook : MonoBehaviour
     float xRotation = 0f;
     Vector3 pos;
     Camera cam;
+    PostProcessLayer layer;
 
     // Start is called before the first frame update
     void Start()
     {
         cam = GetComponent<Camera>();
         cam.fieldOfView = LevelController.instance.s_fov;
+        layer = GetComponent<PostProcessLayer>();
+        layer.antialiasingMode = (PostProcessLayer.Antialiasing)LevelController.instance.s_antia;
         LockMouse();
     }
 

@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Plains
   m_EditorClassIdentifier: 
   biomeName: Plains
-  commonness: 0.8
+  commonness: 10
   foiliageColor: {r: 0.46666667, g: 0.67058825, b: 0.18431373, a: 1}
   grassBlockId: 2
   dirtBlockId: 1

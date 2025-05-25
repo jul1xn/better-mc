@@ -4,7 +4,7 @@ using UnityEngine;
 public class Biome : ScriptableObject
 {
     public string biomeName;
-    [Range(0f, 1f)]
+    [Range(0f, 10f)]
     public float commonness = 1f;
     public Color foiliageColor;
     public short grassBlockId = 2;

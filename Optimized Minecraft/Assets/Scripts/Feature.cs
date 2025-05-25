@@ -1,6 +1,6 @@
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "New Structure", menuName = "Minecraft/Structure")]
+[CreateAssetMenu(fileName = "New Feature", menuName = "Minecraft/Feature")]
 public class Feature : ScriptableObject
 {
     public FeatureBlock[] blocks;

@@ -21,6 +21,9 @@ public class LevelController : MonoBehaviour
     public bool s_frustumCulling;
     public int s_rendDist;
     public float s_fov;
+    public int s_quality;
+    public int s_antia;
+    public bool s_transparentculling;
     [Space]
     public string t_loadedWorldName;
     public WorldSave t_worldsave;
@@ -60,6 +63,9 @@ public class LevelController : MonoBehaviour
         s_fov = PlayerPrefs.GetFloat("s_fov", 60);
         w_worldType = PlayerPrefs.GetInt("w_worldType", 0);
         s_rendDist = PlayerPrefs.GetInt("s_rendDist", 8);
+        s_quality = PlayerPrefs.GetInt("s_quality", 2);
+        s_antia = PlayerPrefs.GetInt("s_antia", 3);
+        s_transparentculling = bool.Parse(PlayerPrefs.GetString("s_transparentculling", "false"));
 
         Debug.Log(Application.persistentDataPath);
     }
@@ -68,10 +74,13 @@ public class LevelController : MonoBehaviour
     {
         PlayerPrefs.SetString("w_infiniteWorld", w_infiniteWorld.ToString());
         PlayerPrefs.SetString("s_frustumCulling", s_frustumCulling.ToString());
+        PlayerPrefs.SetString("s_transparentculling", s_transparentculling.ToString());
         PlayerPrefs.SetFloat("w_chunkSize", w_chunkSize);
         PlayerPrefs.SetFloat("s_fov", s_fov);
         PlayerPrefs.SetInt("w_worldType", w_worldType);
         PlayerPrefs.SetInt("s_rendDist", s_rendDist);
+        PlayerPrefs.SetInt("s_quality", s_quality);
+        PlayerPrefs.SetInt("s_antia", s_antia);
 
         if (SceneManager.GetActiveScene().buildIndex == 1)
         {
