@@ -7,6 +7,7 @@ public class Block : ScriptableObject
     public Sprite uiSprite;
     public TextureType texType;
     public bool isTransparent;
+    public bool isFoiliage;
     [Space]
     public byte lightLevel;
     [Space]

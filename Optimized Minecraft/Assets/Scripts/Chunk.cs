@@ -32,18 +32,6 @@ public class Chunk : MonoBehaviour
         _chunk = new Vector2(int.Parse(lines[0]), int.Parse(lines[1]));
         Vector3 actualPos = new Vector3(_chunk.x, transform.position.y, _chunk.y);
         chunkCenter = actualPos + new Vector3(chunkSize / 2f, chunkSize / 2f, chunkSize / 2f);
-
-        worldCorners = new Vector3[]
-        {
-            bounds.min,
-            bounds.max,
-            new Vector3(bounds.min.x, bounds.min.y, bounds.max.z),
-            new Vector3(bounds.min.x, bounds.max.y, bounds.min.z),
-            new Vector3(bounds.max.x, bounds.min.y, bounds.min.z),
-            new Vector3(bounds.max.x, bounds.max.y, bounds.min.z),
-            new Vector3(bounds.max.x, bounds.min.y, bounds.max.z),
-            new Vector3(bounds.min.x, bounds.max.y, bounds.max.z)
-        };
     }
 
     private void OnDrawGizmos()
@@ -74,9 +62,16 @@ public class Chunk : MonoBehaviour
         Gizmos.DrawWireSphere(pos2, .25f);
 
         Gizmos.color = Color.red;
-        foreach(var bound in worldCorners)
+        try
         {
-            Gizmos.DrawWireSphere(bound, 1f);
+            foreach (var bound in worldCorners)
+            {
+                Gizmos.DrawWireSphere(bound, .5f);
+            }
+        }
+        catch
+        {
+
         }
     }
 
@@ -99,12 +94,10 @@ public class Chunk : MonoBehaviour
             {
                 bounds.min,
                 bounds.max,
-                new Vector3(bounds.min.x, bounds.min.y, bounds.max.z),
-                new Vector3(bounds.min.x, bounds.max.y, bounds.min.z),
-                new Vector3(bounds.max.x, bounds.min.y, bounds.min.z),
-                new Vector3(bounds.max.x, bounds.max.y, bounds.min.z),
-                new Vector3(bounds.max.x, bounds.min.y, bounds.max.z),
-                new Vector3(bounds.min.x, bounds.max.y, bounds.max.z)
+                new Vector3(bounds.min.x, PlayerMovement.instance.transform.position.y, bounds.min.z),
+                new Vector3(bounds.max.x, PlayerMovement.instance.transform.position.y, bounds.min.z),
+                new Vector3(bounds.max.x, PlayerMovement.instance.transform.position.y, bounds.max.z),
+                new Vector3(bounds.min.x, PlayerMovement.instance.transform.position.y, bounds.max.z)
             };
 
             bool isVisible = false;
@@ -182,13 +175,14 @@ public class Chunk : MonoBehaviour
         List<int> triangles = new List<int>();
         List<Vector2> uvs = new List<Vector2>();
         Dictionary<Vector3, byte> lightLevels = new Dictionary<Vector3, byte>();
+        List<Color> colors = new List<Color>();
 
         List<(Vector3, Quaternion, int, Vector2, Vector2)> faceData = new List<(Vector3, Quaternion, int, Vector2, Vector2)>();
 
         foreach (KeyValuePair<Vector3, short> cube in cubes)
         {
             byte lightLevel = BlocksManager.Instance.GetLightLevel((int)cube.Value);
-            WorldGen.instance.CheckFaces(cube.Key, faceData, cubes, cube.Value, lightLevel, lightLevels);
+            WorldGen.instance.CheckFaces(cube.Key, faceData, cubes, cube.Value, lightLevel, lightLevels, colors);
         }
 
         (Vector3[], int[], Vector2[]) meshData = WorldGen.instance.GenerateChunkCollider(faceData);
@@ -200,6 +194,7 @@ public class Chunk : MonoBehaviour
         chunk.uvs = meshData.Item3;
         chunk.chunkPosition = _chunk;
         chunk.cubePositions = cubes;
+        chunk.colors = colors.ToArray();
 
         WorldGen.instance.loadedChunks.Remove(_chunk);
         WorldGen.instance.stagedChunks.Enqueue(chunk);

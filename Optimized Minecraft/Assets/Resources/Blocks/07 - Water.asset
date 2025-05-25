@@ -15,6 +15,7 @@ MonoBehaviour:
   blockName: Water
   uiSprite: {fileID: -2058351913, guid: c171dd08b24a5044783a1d94ce7ed25b, type: 3}
   texType: 0
+  isTransparent: 1
   lightLevel: 0
   isOre: 0
   oreVeinSize: 0

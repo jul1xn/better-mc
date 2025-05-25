@@ -292,7 +292,8 @@ public class WorldGen : MonoBehaviour
             {
                 vertices = stagedChunk.vertices,
                 triangles = stagedChunk.triangles,
-                uv = stagedChunk.uvs
+                uv = stagedChunk.uvs,
+                colors = stagedChunk.colors
             };
             mesh.RecalculateNormals();
 
@@ -409,13 +410,77 @@ public class WorldGen : MonoBehaviour
         }
     }
 
-    private List<(Vector3, Quaternion, int, Vector2, Vector2)> CreateFaces(ref Dictionary<Vector3, short> cubes, ref Dictionary<Vector3, byte> lightLevels)
+
+    public void CheckFaces(
+            Vector3 cubePosition,
+            List<(Vector3, Quaternion, int, Vector2, Vector2)> faceData,
+            Dictionary<Vector3, short> cubes,
+            short blockId,
+            byte lightLevel,
+            Dictionary<Vector3, byte> lightLevelData,
+            List<Color> colors)
+    {
+        Block block = BlocksManager.Instance.allBlocks[blockId];
+
+        (Vector3 direction, Quaternion rotation, string face)[] checks =
+        {
+            (Vector3.forward, Quaternion.identity, "front"),
+            (Vector3.back, Quaternion.Euler(0, 180, 0), "back"),
+            (Vector3.right, Quaternion.Euler(0, 90, 0), "right"),
+            (Vector3.left, Quaternion.Euler(0, -90, 0), "left"),
+            (Vector3.down, Quaternion.Euler(90, 0, 0), "bottom"),
+            (Vector3.up, Quaternion.Euler(-90, 0, 0), "top")
+        };
+
+        foreach (var (direction, rotation, face) in checks)
+        {
+            bool shouldAddFace = false;
+
+            if (!cubes.TryGetValue(cubePosition + direction, out short otherCube))
+            {
+                shouldAddFace = true;
+            }
+            else if (BlocksManager.Instance.IsTransparent(otherCube))
+            {
+                shouldAddFace = true;
+            }
+
+            if (shouldAddFace)
+            {
+                short textureIndex = BlocksManager.GetTextureIndexForFace(block, face);
+                Vector2 uvBase = textureAtlas[textureIndex];
+
+                System.Random r = new System.Random();
+
+                Color faceColor = Color.white;
+
+                if (BlocksManager.Instance.IsFoiliage(blockId))
+                {
+                    Biome currentBiome = BlocksManager.Instance.GetBiomeAtPos(new Vector2(cubePosition.x, cubePosition.z), seed);
+                    faceColor = currentBiome.foiliageColor;
+                }
+
+                // Add the color to your colors list
+                colors.Add(faceColor); colors.Add(faceColor); colors.Add(faceColor); colors.Add(faceColor);
+
+                faceData.Add((cubePosition + direction * 0.5f, rotation, blockId, uvBase, new Vector2(1, 1)));
+
+                if (lightLevel > 0)
+                {
+                    lightLevelData[cubePosition + direction * 0.7f] = lightLevel;
+                }
+            }
+        }
+    }
+
+
+    private List<(Vector3, Quaternion, int, Vector2, Vector2)> CreateFaces(ref Dictionary<Vector3, short> cubes, ref Dictionary<Vector3, byte> lightLevels, ref List<Color> colors)
     {
         List<(Vector3, Quaternion, int, Vector2, Vector2)> faceData = new List<(Vector3, Quaternion, int, Vector2, Vector2)>();
         foreach (var cube in cubes)
         {
             byte lightLevel = BlocksManager.Instance.GetLightLevel((int)cube.Value);
-            CheckFaces(cube.Key, faceData, cubes, cubes[cube.Key], lightLevel, lightLevels);
+            CheckFaces(cube.Key, faceData, cubes, cubes[cube.Key], lightLevel, lightLevels, colors);
         }
 
         return faceData;
@@ -430,6 +495,7 @@ public class WorldGen : MonoBehaviour
         try
         {
             sw.Start();
+            List<Color> colors = new List<Color>();
             Dictionary<Vector3, short> cubes = new Dictionary<Vector3, short>();
             Dictionary<Vector3, byte> lightLevels = new Dictionary<Vector3, byte>();
 
@@ -443,7 +509,7 @@ public class WorldGen : MonoBehaviour
             modTime = sw.ElapsedMilliseconds;
 
             sw.Restart();
-            var faceData = CreateFaces(ref cubes, ref lightLevels);
+            var faceData = CreateFaces(ref cubes, ref lightLevels, ref colors);
             sw.Stop();
             faceTime = sw.ElapsedMilliseconds;
 
@@ -462,7 +528,8 @@ public class WorldGen : MonoBehaviour
                 triangles = tris,
                 uvs = uvs,
                 chunkPosition = chunkPos,
-                cubePositions = cubes
+                cubePositions = cubes,
+                colors = colors.ToArray()
             };
 
             stagedChunks.Enqueue(chunk);
@@ -489,51 +556,6 @@ public class WorldGen : MonoBehaviour
                     writer.WriteLine("ChunkX,ChunkY,TerrainTime(ms),ModificationTime(ms),FaceTime(ms),MeshTime(ms),TotalTime(ms)");
                 }
                 writer.WriteLine(line);
-            }
-        }
-    }
-
-
-    public void CheckFaces(Vector3 cubePosition, List<(Vector3, Quaternion, int, Vector2, Vector2)> faceData, Dictionary<Vector3, short> cubes, short blockId, byte lightLevel, Dictionary<Vector3, byte> lightLevelData)
-    {
-        Block block = BlocksManager.Instance.allBlocks[blockId];
-
-        (Vector3 direction, Quaternion rotation, string face)[] checks =
-            {
-            (Vector3.forward, Quaternion.identity, "front"),
-            (Vector3.back, Quaternion.Euler(0, 180, 0), "back"),
-            (Vector3.right, Quaternion.Euler(0, 90, 0), "right"),
-            (Vector3.left, Quaternion.Euler(0, -90, 0), "left"),
-            (Vector3.down, Quaternion.Euler(90, 0, 0), "bottom"),
-            (Vector3.up, Quaternion.Euler(-90, 0, 0), "top")
-        };
-
-        foreach (var (direction, rotation, face) in checks)
-        {
-            if (!cubes.TryGetValue(cubePosition + direction, out short otherCube))
-            {
-                short textureIndex = BlocksManager.GetTextureIndexForFace(block, face);
-                Vector2 uvBase = textureAtlas[textureIndex];
-
-                faceData.Add((cubePosition + direction * 0.5f, rotation, blockId, uvBase, new Vector2(1, 1)));
-                if (lightLevel > 0)
-                {
-                    lightLevelData[cubePosition + direction * 0.7f] = lightLevel;
-                }
-            }
-            else
-            {
-                if (BlocksManager.Instance.IsTransparent(otherCube))
-                {
-                    short textureIndex = BlocksManager.GetTextureIndexForFace(block, face);
-                    Vector2 uvBase = textureAtlas[textureIndex];
-
-                    faceData.Add((cubePosition + direction * 0.5f, rotation, blockId, uvBase, new Vector2(1, 1)));
-                    if (lightLevel > 0)
-                    {
-                        lightLevelData[cubePosition + direction * 0.7f] = lightLevel;
-                    }
-                }
             }
         }
     }
@@ -615,6 +637,7 @@ public class StagedChunk
     public Vector3[] vertices;
     public int[] triangles;
     public Vector2[] uvs;
+    public Color[] colors;
 }
 
 public enum WorldType { Normal, Flat, Amplified, Debug }
