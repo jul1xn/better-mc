@@ -362,11 +362,11 @@ public class WorldGen : MonoBehaviour
                     }
 
                     if (y <= stoneHeight)
-                        cubes[pos] = b.stoneBlockId;
+                        cubes[pos] = b.bottomBlockId;
                     else if (y == height - 1)
-                        cubes[pos] = b.grassBlockId;
+                        cubes[pos] = b.topBlockId;
                     else
-                        cubes[pos] = b.dirtBlockId;
+                        cubes[pos] = b.middleBlockId;
                 }
 
                 cubes[new Vector3(x, -31, z)] = 9;

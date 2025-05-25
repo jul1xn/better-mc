@@ -7,9 +7,9 @@ public class Biome : ScriptableObject
     [Range(0f, 10f)]
     public float commonness = 1f;
     public Color foiliageColor;
-    public short grassBlockId = 2;
-    public short dirtBlockId = 1;
-    public short stoneBlockId = 0;
+    public short topBlockId = 2;
+    public short middleBlockId = 1;
+    public short bottomBlockId = 0;
     public SpawnableFeature[] spawnAbleFeatures;
 }
 

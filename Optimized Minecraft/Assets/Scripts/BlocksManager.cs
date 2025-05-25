@@ -9,9 +9,9 @@ public class BlocksManager : MonoBehaviour
     public string blockPath;
     public string biomePath;
     public float biomeScale = 0.01f; // Controls biome size — higher scale = larger biomes
-    public Block[] allBlocks;
-    public Block[] allOres;
-    public Biome[] allBiomes;
+    public List<Block> allBlocks = new List<Block>();
+    public List<Block> allOres = new List<Block>();
+    public List<Biome> allBiomes = new List<Biome>();
     public static BlocksManager Instance;
 
     private void Awake()
@@ -27,14 +27,25 @@ public class BlocksManager : MonoBehaviour
 
     public void Start()
     {
-        allBlocks = Resources.LoadAll<Block>(blockPath);
-        allOres = allBlocks.Where(x => x.isOre).ToArray();
-        allBiomes = Resources.LoadAll<Biome>(biomePath);
+        RefreshDB();
+        DataPackManager.Instance.ReloadAllPacks();
+    }
+
+    public void RefreshDB()
+    {
+        allBlocks.Clear();
+        allBlocks = Resources.LoadAll<Block>(blockPath).ToList();
+
+        allOres.Clear();
+        allOres = allBlocks.Where(x => x.isOre).ToList();
+
+        allBiomes.Clear();
+        allBiomes = Resources.LoadAll<Biome>(biomePath).ToList();
     }
 
     public short GetBlockByName(string name)
     {
-        for (int i = 0; i < allBlocks.Length; i++)
+        for (int i = 0; i < allBlocks.Count; i++)
         {
             Block b = allBlocks[i];
             if (b.blockName == name)

@@ -30,7 +30,7 @@ public class PlayerUI : MonoBehaviour
         inUI = false;
         debugMenu = false;
 
-        sprites = BlocksManager.Instance.allBlocks;
+        sprites = BlocksManager.Instance.allBlocks.ToArray();
         for (int i = 0; i < sprites.Length; i++)
         {
             Sprite tSprite = sprites[i].uiSprite;
