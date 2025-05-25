@@ -489,36 +489,17 @@ public class WorldGen : MonoBehaviour
 
     private void ChunkThread(Vector2 chunkPos)
     {
-        Stopwatch sw = new Stopwatch();
-        long terrainTime, modTime, faceTime, meshTime, totalTime;
-
         try
         {
-            sw.Start();
             List<Color> colors = new List<Color>();
             Dictionary<Vector3, short> cubes = new Dictionary<Vector3, short>();
             Dictionary<Vector3, byte> lightLevels = new Dictionary<Vector3, byte>();
 
             GenerateTerrain(chunkPos, ref cubes);
-            sw.Stop();
-            terrainTime = sw.ElapsedMilliseconds;
-
-            sw.Restart();
             ApplyModifiedBlocks(chunkPos, ref cubes);
-            sw.Stop();
-            modTime = sw.ElapsedMilliseconds;
 
-            sw.Restart();
             var faceData = CreateFaces(ref cubes, ref lightLevels, ref colors);
-            sw.Stop();
-            faceTime = sw.ElapsedMilliseconds;
-
-            sw.Restart();
             var (verts, tris, uvs) = GenerateChunkCollider(faceData);
-            sw.Stop();
-            meshTime = sw.ElapsedMilliseconds;
-
-            totalTime = terrainTime + modTime + faceTime + meshTime;
 
             // Enqueue result
             StagedChunk chunk = new StagedChunk
@@ -533,30 +514,10 @@ public class WorldGen : MonoBehaviour
             };
 
             stagedChunks.Enqueue(chunk);
-
-            // Write CSV entry
-            string csvLine = $"{chunkPos.x},{chunkPos.y},{terrainTime},{modTime},{faceTime},{meshTime},{totalTime}";
-            WriteTimingToCsv(csvLine);
         }
         catch (Exception ex)
         {
             UnityEngine.Debug.LogError($"[ChunkThread ERROR] Chunk {chunkPos}: {ex.Message}\n{ex.StackTrace}");
-        }
-    }
-
-    private void WriteTimingToCsv(string line)
-    {
-        lock (csvLock)
-        {
-            bool writeHeader = !System.IO.File.Exists(ChunkTimingCsvPath);
-            using (var writer = new System.IO.StreamWriter(ChunkTimingCsvPath, append: true))
-            {
-                if (writeHeader)
-                {
-                    writer.WriteLine("ChunkX,ChunkY,TerrainTime(ms),ModificationTime(ms),FaceTime(ms),MeshTime(ms),TotalTime(ms)");
-                }
-                writer.WriteLine(line);
-            }
         }
     }
 
