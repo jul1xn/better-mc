@@ -15,7 +15,11 @@ MonoBehaviour:
   blockName: Stone
   uiSprite: {fileID: -35051524, guid: c171dd08b24a5044783a1d94ce7ed25b, type: 3}
   texType: 0
-  frontMainTexture: 51
+  lightLevel: 0
+  isOre: 0
+  oreVeinSize: 0
+  oreRarity: 0
+  frontMainTexture: 840
   backTexture: 0
   leftTexture: 0
   rightTexture: 0

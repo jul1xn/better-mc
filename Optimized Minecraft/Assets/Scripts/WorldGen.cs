@@ -126,19 +126,40 @@ public class WorldGen : MonoBehaviour
 
             // Adjust UV mapping
             Mesh mesh = cube.GetComponent<MeshFilter>().mesh;
-            Vector2[] uvs = new Vector2[mesh.uv.Length];
+            Vector2[] uvs = mesh.uv;
 
-            // Correct UV mapping based on atlas coordinates
+            // Update the UVs using base + offset
             uvs[0] = uvBase + new Vector2(0, 0);
             uvs[1] = uvBase + new Vector2(uvSize, 0);
             uvs[2] = uvBase + new Vector2(0, uvSize);
             uvs[3] = uvBase + new Vector2(uvSize, uvSize);
+            uvs[4] = uvBase + new Vector2(0, 0);
+            uvs[5] = uvBase + new Vector2(uvSize, 0);
+            uvs[6] = uvBase + new Vector2(0, uvSize);
+            uvs[7] = uvBase + new Vector2(uvSize, uvSize);
 
             mesh.uv = uvs;
+
+            // Create 3D Text for the blockID
+            GameObject textObj = new GameObject($"Text_{blockID}");
+            textObj.transform.SetParent(cube.transform); // Parent to cube
+            textObj.transform.localPosition = new Vector3(0, 0f, 0.6f); // Slightly above the cube
+            textObj.transform.localScale = Vector3.one * 0.85f;
+            textObj.transform.localRotation = Quaternion.Euler(new Vector3(0, 180, 0));
+
+            TextMesh textMesh = textObj.AddComponent<TextMesh>();
+            textMesh.text = blockID.ToString();
+            textMesh.fontSize = 32;
+            textMesh.characterSize = 0.1f;
+            textMesh.anchor = TextAnchor.MiddleCenter;
+            textMesh.alignment = TextAlignment.Center;
+            textMesh.color = Color.black;
 
             index++;
         }
     }
+
+
     private void Update()
     {
         ProcessStagedChunks();
@@ -388,13 +409,13 @@ public class WorldGen : MonoBehaviour
         }
     }
 
-    private List<(Vector3, Quaternion, int, Vector2, Vector2)> CreateFaces(ref Dictionary<Vector3, short> cubes, ref Dictionary<Vector3, byte> lightLevels, HashSet<Vector3> cubeSet)
+    private List<(Vector3, Quaternion, int, Vector2, Vector2)> CreateFaces(ref Dictionary<Vector3, short> cubes, ref Dictionary<Vector3, byte> lightLevels)
     {
         List<(Vector3, Quaternion, int, Vector2, Vector2)> faceData = new List<(Vector3, Quaternion, int, Vector2, Vector2)>();
         foreach (var cube in cubes)
         {
             byte lightLevel = BlocksManager.Instance.GetLightLevel((int)cube.Value);
-            CheckFaces(cube.Key, faceData, cubeSet, cubes[cube.Key], lightLevel, lightLevels);
+            CheckFaces(cube.Key, faceData, cubes, cubes[cube.Key], lightLevel, lightLevels);
         }
 
         return faceData;
@@ -411,7 +432,6 @@ public class WorldGen : MonoBehaviour
             sw.Start();
             Dictionary<Vector3, short> cubes = new Dictionary<Vector3, short>();
             Dictionary<Vector3, byte> lightLevels = new Dictionary<Vector3, byte>();
-            HashSet<Vector3> cubeSet;
 
             GenerateTerrain(chunkPos, ref cubes);
             sw.Stop();
@@ -423,8 +443,7 @@ public class WorldGen : MonoBehaviour
             modTime = sw.ElapsedMilliseconds;
 
             sw.Restart();
-            cubeSet = new HashSet<Vector3>(cubes.Keys);
-            var faceData = CreateFaces(ref cubes, ref lightLevels, cubeSet);
+            var faceData = CreateFaces(ref cubes, ref lightLevels);
             sw.Stop();
             faceTime = sw.ElapsedMilliseconds;
 
@@ -475,7 +494,7 @@ public class WorldGen : MonoBehaviour
     }
 
 
-    public void CheckFaces(Vector3 cubePosition, List<(Vector3, Quaternion, int, Vector2, Vector2)> faceData, HashSet<Vector3> cubes, short blockId, byte lightLevel, Dictionary<Vector3, byte> lightLevelData)
+    public void CheckFaces(Vector3 cubePosition, List<(Vector3, Quaternion, int, Vector2, Vector2)> faceData, Dictionary<Vector3, short> cubes, short blockId, byte lightLevel, Dictionary<Vector3, byte> lightLevelData)
     {
         Block block = BlocksManager.Instance.allBlocks[blockId];
 
@@ -491,7 +510,7 @@ public class WorldGen : MonoBehaviour
 
         foreach (var (direction, rotation, face) in checks)
         {
-            if (!cubes.Contains(cubePosition + direction))
+            if (!cubes.TryGetValue(cubePosition + direction, out short otherCube))
             {
                 short textureIndex = BlocksManager.GetTextureIndexForFace(block, face);
                 Vector2 uvBase = textureAtlas[textureIndex];
@@ -500,6 +519,20 @@ public class WorldGen : MonoBehaviour
                 if (lightLevel > 0)
                 {
                     lightLevelData[cubePosition + direction * 0.7f] = lightLevel;
+                }
+            }
+            else
+            {
+                if (BlocksManager.Instance.IsTransparent(otherCube))
+                {
+                    short textureIndex = BlocksManager.GetTextureIndexForFace(block, face);
+                    Vector2 uvBase = textureAtlas[textureIndex];
+
+                    faceData.Add((cubePosition + direction * 0.5f, rotation, blockId, uvBase, new Vector2(1, 1)));
+                    if (lightLevel > 0)
+                    {
+                        lightLevelData[cubePosition + direction * 0.7f] = lightLevel;
+                    }
                 }
             }
         }

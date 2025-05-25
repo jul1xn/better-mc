@@ -18,6 +18,9 @@ public class Chunk : MonoBehaviour
 
     Vector3 pos1;
     Vector3 pos2;
+    Bounds bounds;
+
+    Vector3[] worldCorners;
 
     private void Start()
     {
@@ -29,11 +32,23 @@ public class Chunk : MonoBehaviour
         _chunk = new Vector2(int.Parse(lines[0]), int.Parse(lines[1]));
         Vector3 actualPos = new Vector3(_chunk.x, transform.position.y, _chunk.y);
         chunkCenter = actualPos + new Vector3(chunkSize / 2f, chunkSize / 2f, chunkSize / 2f);
+
+        worldCorners = new Vector3[]
+        {
+            bounds.min,
+            bounds.max,
+            new Vector3(bounds.min.x, bounds.min.y, bounds.max.z),
+            new Vector3(bounds.min.x, bounds.max.y, bounds.min.z),
+            new Vector3(bounds.max.x, bounds.min.y, bounds.min.z),
+            new Vector3(bounds.max.x, bounds.max.y, bounds.min.z),
+            new Vector3(bounds.max.x, bounds.min.y, bounds.max.z),
+            new Vector3(bounds.min.x, bounds.max.y, bounds.max.z)
+        };
     }
 
     private void OnDrawGizmos()
     {
-        if (!Application.isPlaying || !WorldGen.instance.debugDraw) return; // Avoid running in edit mode
+        if (!Application.isPlaying) return; // Avoid running in edit mode
 
         // Get player position
         Vector3 playerPosition = PlayerMovement.instance.transform.position;
@@ -51,12 +66,18 @@ public class Chunk : MonoBehaviour
         Gizmos.color = distanceToPlayer <= distance ? Color.green : Color.red;
 
         // Draw a wire cube around the chunk
-        Gizmos.DrawWireCube(bounds.center, bounds.size);
+        //Gizmos.DrawWireCube(bounds.center, bounds.size);
 
         Gizmos.color = Color.blue;
         Gizmos.DrawWireSphere(pos1, .25f);
         Gizmos.color = Color.green;
         Gizmos.DrawWireSphere(pos2, .25f);
+
+        Gizmos.color = Color.red;
+        foreach(var bound in worldCorners)
+        {
+            Gizmos.DrawWireSphere(bound, 1f);
+        }
     }
 
     private void Update()
@@ -73,18 +94,17 @@ public class Chunk : MonoBehaviour
 
         if (LevelController.instance.s_frustumCulling)
         {
-            Bounds bounds = rend.bounds;
-
-            Vector3[] worldCorners = new Vector3[]
+            bounds = rend.bounds;
+            worldCorners = new Vector3[]
             {
-            bounds.min,
-            bounds.max,
-            new Vector3(bounds.min.x, bounds.min.y, bounds.max.z),
-            new Vector3(bounds.min.x, bounds.max.y, bounds.min.z),
-            new Vector3(bounds.max.x, bounds.min.y, bounds.min.z),
-            new Vector3(bounds.max.x, bounds.max.y, bounds.min.z),
-            new Vector3(bounds.max.x, bounds.min.y, bounds.max.z),
-            new Vector3(bounds.min.x, bounds.max.y, bounds.max.z)
+                bounds.min,
+                bounds.max,
+                new Vector3(bounds.min.x, bounds.min.y, bounds.max.z),
+                new Vector3(bounds.min.x, bounds.max.y, bounds.min.z),
+                new Vector3(bounds.max.x, bounds.min.y, bounds.min.z),
+                new Vector3(bounds.max.x, bounds.max.y, bounds.min.z),
+                new Vector3(bounds.max.x, bounds.min.y, bounds.max.z),
+                new Vector3(bounds.min.x, bounds.max.y, bounds.max.z)
             };
 
             bool isVisible = false;
@@ -163,13 +183,12 @@ public class Chunk : MonoBehaviour
         List<Vector2> uvs = new List<Vector2>();
         Dictionary<Vector3, byte> lightLevels = new Dictionary<Vector3, byte>();
 
-        HashSet<Vector3> cubeSet = new HashSet<Vector3>(cubes.Keys);
         List<(Vector3, Quaternion, int, Vector2, Vector2)> faceData = new List<(Vector3, Quaternion, int, Vector2, Vector2)>();
 
         foreach (KeyValuePair<Vector3, short> cube in cubes)
         {
             byte lightLevel = BlocksManager.Instance.GetLightLevel((int)cube.Value);
-            WorldGen.instance.CheckFaces(cube.Key, faceData, cubeSet, cube.Value, lightLevel, lightLevels);
+            WorldGen.instance.CheckFaces(cube.Key, faceData, cubes, cube.Value, lightLevel, lightLevels);
         }
 
         (Vector3[], int[], Vector2[]) meshData = WorldGen.instance.GenerateChunkCollider(faceData);

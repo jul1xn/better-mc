@@ -15,9 +15,13 @@ MonoBehaviour:
   blockName: Oak Log
   uiSprite: {fileID: 488886377, guid: c171dd08b24a5044783a1d94ce7ed25b, type: 3}
   texType: 1
-  frontMainTexture: 131
+  lightLevel: 0
+  isOre: 0
+  oreVeinSize: 0
+  oreRarity: 0
+  frontMainTexture: 610
   backTexture: 0
   leftTexture: 0
   rightTexture: 0
-  topTexture: 132
-  bottomTexture: 132
+  topTexture: 611
+  bottomTexture: 611

@@ -50,6 +50,11 @@ public class BlocksManager : MonoBehaviour
         return allBlocks[blockId].lightLevel;
     }
 
+    public bool IsTransparent(int blockId)
+    {
+        return allBlocks[blockId].isTransparent;
+    }
+
     public static short GetTextureIndexForFace(Block block, string face)
     {
         switch (block.texType)
