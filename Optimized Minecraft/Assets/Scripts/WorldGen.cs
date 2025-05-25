@@ -95,11 +95,11 @@ public class WorldGen : MonoBehaviour
             UnityEngine.Debug.LogError("Player transform not assigned to WorldGen!");
             return;
         }
-        lastPlayerChunk = GetChunkCoord(player.position);
 
         PlayerMovement.instance.TeleportToPosition(Helper.ConvertStringToVector3(LevelController.instance.t_worldsave.playerPosition));
         PlayerMovement.instance.mouseLook.SetRotation(Helper.ConvertStringToVector3(LevelController.instance.t_worldsave.playerRotation));
-
+        
+        lastPlayerChunk = GetChunkCoord(player.position);
         LoadChunksAroundPlayer();
     }
 
