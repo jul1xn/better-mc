@@ -20,6 +20,6 @@ MonoBehaviour:
   stoneBlockId: 0
   spawnAbleFeatures:
   - feature: {fileID: 11400000, guid: 38dbb4d68f774f446a036d6de7008ad5, type: 2}
-    commonness: 100
+    commonness: 50
   - feature: {fileID: 11400000, guid: 9d0d0ca8dfefa22449dde8a632b0c636, type: 2}
-    commonness: 100
+    commonness: 50

@@ -16,7 +16,7 @@ public class World : MonoBehaviour
     public void Init(string name)
     {
         _worldname = name;
-        string fileName = $"\\{_worldname}";
+        string fileName = $"\\saves\\{_worldname}";
         string path = Application.persistentDataPath + fileName;
         save = JsonConvert.DeserializeObject<WorldSave>(File.ReadAllText(path));
         worldName.text = save.worldName;

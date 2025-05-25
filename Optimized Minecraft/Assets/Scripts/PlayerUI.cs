@@ -139,6 +139,43 @@ public class PlayerUI : MonoBehaviour
             {
                 PlayerMovement.instance.ToggleFly();
             }
+
+            if (msgs[0] == "biome")
+            {
+                Biome targetBiome = BlocksManager.Instance.GetBiomeByName(msgs[1]);
+                Vector2 targetPos = new Vector2(PlayerMovement.instance.transform.position.x, PlayerMovement.instance.transform.position.z);
+
+                Biome foundBiome = null;
+                int maxRadius = 10000;
+                float step = 1f;
+
+                bool biomeFound = false;
+
+                for (int radius = 0; radius <= maxRadius && !biomeFound; radius++)
+                {
+                    for (float angle = 0; angle < 360f; angle += 10f)
+                    {
+                        float rad = angle * Mathf.Deg2Rad;
+                        float x = targetPos.x + Mathf.Cos(rad) * radius * step;
+                        float z = targetPos.y + Mathf.Sin(rad) * radius * step;
+                        Vector2 checkPos = new Vector2(x, z);
+
+                        foundBiome = BlocksManager.Instance.GetBiomeAtPos(checkPos, WorldGen.instance.seed);
+                        if (foundBiome != null && foundBiome.biomeName == targetBiome.biomeName)
+                        {
+                            Debug.Log($"Biome '{targetBiome.biomeName}' found at: {checkPos}");
+                            biomeFound = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (!biomeFound)
+                {
+                    Debug.LogWarning($"Biome '{targetBiome.biomeName}' not found within radius {maxRadius}");
+                }
+            }
+
         }
     }
 }

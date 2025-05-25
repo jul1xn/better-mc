@@ -46,6 +46,19 @@ public class BlocksManager : MonoBehaviour
         return (short)-1;
     }
 
+    public Biome GetBiomeByName(string name)
+    {
+        foreach(Biome b in allBiomes)
+        {
+            if (name.ToLower() == b.biomeName.ToLower())
+            {
+                return b;
+            }
+        }
+
+        return null;
+    }
+
     public byte GetLightLevel(int blockId)
     {
         return allBlocks[blockId].lightLevel;

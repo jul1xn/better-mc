@@ -67,7 +67,7 @@ public class MainMenuUI : MonoBehaviour
 
     public void LoadWorlds()
     {
-        DirectoryInfo d = new DirectoryInfo(Application.persistentDataPath);
+        DirectoryInfo d = new DirectoryInfo(Application.persistentDataPath + "\\saves\\");
         foreach(var file in d.GetFiles("*.save"))
         {
             GameObject obj = Instantiate(worldPrefab, worldParent);

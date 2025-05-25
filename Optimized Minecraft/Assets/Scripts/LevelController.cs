@@ -84,8 +84,13 @@ public class LevelController : MonoBehaviour
     public void LoadWorld(string name)
     {
         t_loadedWorldName = Helper.ConvertToValidFilename(name);
-        string fileName = $"\\{t_loadedWorldName}.save";
+        string fileName = $"\\saves\\{t_loadedWorldName}.save";
         string path = Application.persistentDataPath + fileName;
+
+        if (!Directory.Exists(Path.GetDirectoryName(path)))
+        {
+            Directory.CreateDirectory(Path.GetDirectoryName(path));
+        }
 
         if (File.Exists(path))
         {
@@ -112,8 +117,13 @@ public class LevelController : MonoBehaviour
 
     public void SaveWorld()
     {
-        string fileName = $"\\{t_loadedWorldName}.save";
+        string fileName = $"\\saves\\{t_loadedWorldName}.save";
         string path = Application.persistentDataPath + fileName;
+
+        if (!Directory.Exists(Path.GetDirectoryName(path)))
+        {
+            Directory.CreateDirectory(Path.GetDirectoryName(path));
+        }
 
         t_worldsave.playerPosition = Helper.ConvertVector3ToString(PlayerMovement.instance.transform.position);
         t_worldsave.playerRotation = Helper.ConvertVector3ToString(new Vector3(PlayerMovement.instance.mouseLook.transform.eulerAngles.x, PlayerMovement.instance.transform.eulerAngles.y, 0f));
@@ -122,22 +132,6 @@ public class LevelController : MonoBehaviour
         string data = JsonConvert.SerializeObject(t_worldsave);
         File.WriteAllText(path, data);
         Debug.Log($"World {t_loadedWorldName} at {path}");
-    }
-
-    public static string GetMenuFileSize(string name)
-    {
-        string fileName = $"\\{Helper.ConvertToValidFilename(name)}.save";
-        string path = Application.persistentDataPath + fileName;
-        if (File.Exists(path))
-        {
-            FileInfo fileInfo = new FileInfo(path);
-            float fileSize = Mathf.Round(fileInfo.Length / 10000) / 100;
-            return $"({fileSize} MB)";
-        }
-        else
-        {
-            return "(? MB)";
-        }
     }
 }
 
