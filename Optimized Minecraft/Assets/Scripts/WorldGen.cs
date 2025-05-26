@@ -32,6 +32,12 @@ public class WorldGen : MonoBehaviour
     public Transform player;
     public bool debugDraw = false;
     System.Random randomNumber = new System.Random();
+    public short[] breakingStages;
+    public Transform breakingBlock;
+    MeshRenderer breakingMesh;
+    bool isBreakingBlock;
+    int breakingStage = 0;
+    float breakingTime;
 
     public Dictionary<Vector2, GameObject> loadedChunks = new Dictionary<Vector2, GameObject>();
     private Vector2 lastPlayerChunk;
@@ -63,8 +69,15 @@ public class WorldGen : MonoBehaviour
         instance = this;
     }
 
+    public void StartBreakAnim(float totalBreakTime)
+    {
+        isBreakingBlock = true;
+        breakingTime = totalBreakTime;
+    }
+
     private void Start()
     {
+        breakingMesh = breakingBlock.GetComponent<MeshRenderer>();
         modifiedBlockCopy = LevelController.instance.t_worldsave.modifiedChunks;
         seed = LevelController.instance.t_worldsave.seed;
         chunkRendDistance = LevelController.instance.s_rendDist;
@@ -102,7 +115,6 @@ public class WorldGen : MonoBehaviour
         lastPlayerChunk = GetChunkCoord(player.position);
         LoadChunksAroundPlayer();
     }
-
 
     public void TestTextureAtlas()
     {

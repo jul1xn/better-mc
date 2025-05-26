@@ -13,8 +13,10 @@ MonoBehaviour:
   m_Name: 01 - Dirt
   m_EditorClassIdentifier: 
   blockName: Dirt
-  uiSprite: {fileID: 812315313, guid: c171dd08b24a5044783a1d94ce7ed25b, type: 3}
+  uiSprite: {fileID: -84760812, guid: fd0c20cf555509a4bb25f1a1777b7cec, type: 3}
   texType: 0
+  isTransparent: 0
+  isFoiliage: 0
   lightLevel: 0
   isOre: 0
   oreVeinSize: 0

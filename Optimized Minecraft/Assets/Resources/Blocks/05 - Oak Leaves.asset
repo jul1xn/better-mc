@@ -13,10 +13,12 @@ MonoBehaviour:
   m_Name: 05 - Oak Leaves
   m_EditorClassIdentifier: 
   blockName: Oak Leaves
-  uiSprite: {fileID: -466665435, guid: c171dd08b24a5044783a1d94ce7ed25b, type: 3}
+  uiSprite: {fileID: 1566544191, guid: fd0c20cf555509a4bb25f1a1777b7cec, type: 3}
   texType: 0
   isTransparent: 1
   isFoiliage: 1
+  targetTool: 5
+  baseMiningSpeed: 0.7
   lightLevel: 0
   isOre: 0
   oreVeinSize: 0

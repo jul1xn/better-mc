@@ -13,9 +13,10 @@ MonoBehaviour:
   m_Name: 11 - Birch Planks
   m_EditorClassIdentifier: 
   blockName: Birch Planks
-  uiSprite: {fileID: 715005663, guid: c171dd08b24a5044783a1d94ce7ed25b, type: 3}
+  uiSprite: {fileID: -1555084708, guid: fd0c20cf555509a4bb25f1a1777b7cec, type: 3}
   texType: 0
   isTransparent: 0
+  isFoiliage: 0
   lightLevel: 0
   isOre: 0
   oreVeinSize: 0

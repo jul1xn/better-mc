@@ -13,8 +13,12 @@ MonoBehaviour:
   m_Name: 00 - Stone
   m_EditorClassIdentifier: 
   blockName: Stone
-  uiSprite: {fileID: -35051524, guid: c171dd08b24a5044783a1d94ce7ed25b, type: 3}
+  uiSprite: {fileID: 1344212206, guid: fd0c20cf555509a4bb25f1a1777b7cec, type: 3}
   texType: 0
+  isTransparent: 0
+  isFoiliage: 0
+  targetTool: 1
+  baseMiningSpeed: 2
   lightLevel: 0
   isOre: 0
   oreVeinSize: 0

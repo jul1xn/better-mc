@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: 15 - Cactus
   m_EditorClassIdentifier: 
   blockName: Cactus
-  uiSprite: {fileID: 0}
+  uiSprite: {fileID: -80027717, guid: fd0c20cf555509a4bb25f1a1777b7cec, type: 3}
   texType: 1
   isTransparent: 0
   isFoiliage: 0

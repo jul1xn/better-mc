@@ -13,8 +13,10 @@ MonoBehaviour:
   m_Name: 08 - Glowstone
   m_EditorClassIdentifier: 
   blockName: Glowstone
-  uiSprite: {fileID: 1184278791, guid: c171dd08b24a5044783a1d94ce7ed25b, type: 3}
+  uiSprite: {fileID: 1680742810, guid: fd0c20cf555509a4bb25f1a1777b7cec, type: 3}
   texType: 0
+  isTransparent: 0
+  isFoiliage: 0
   lightLevel: 15
   isOre: 0
   oreVeinSize: 0

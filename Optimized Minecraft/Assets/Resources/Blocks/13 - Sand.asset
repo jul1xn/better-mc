@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: 13 - Sand
   m_EditorClassIdentifier: 
   blockName: Sand
-  uiSprite: {fileID: 0}
+  uiSprite: {fileID: 844932173, guid: fd0c20cf555509a4bb25f1a1777b7cec, type: 3}
   texType: 0
   isTransparent: 0
   isFoiliage: 0

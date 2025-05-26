@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UIElements;
 
 [CreateAssetMenu(fileName = "New Block", menuName = "Minecraft/Block")]
 public class Block : ScriptableObject
@@ -8,6 +9,9 @@ public class Block : ScriptableObject
     public TextureType texType;
     public bool isTransparent;
     public bool isFoiliage;
+    [Space]
+    public TargetTool targetTool;
+    public float baseMiningSpeed = 1;
     [Space]
     public byte lightLevel;
     [Space]
@@ -37,3 +41,4 @@ public class Block : ScriptableObject
 }
 
 public enum TextureType { SingleTex, TopBottomAndSides, AllDifferent }
+public enum TargetTool { Shovel, Pickaxe, Axe, Hoe, Sword, Shears }

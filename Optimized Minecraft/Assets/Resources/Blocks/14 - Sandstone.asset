@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: 14 - Sandstone
   m_EditorClassIdentifier: 
   blockName: Sandstone
-  uiSprite: {fileID: 0}
+  uiSprite: {fileID: -652401588, guid: fd0c20cf555509a4bb25f1a1777b7cec, type: 3}
   texType: 1
   isTransparent: 0
   isFoiliage: 0

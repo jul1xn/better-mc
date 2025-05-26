@@ -13,9 +13,12 @@ MonoBehaviour:
   m_Name: 10 - Birch Log
   m_EditorClassIdentifier: 
   blockName: Birch Log
-  uiSprite: {fileID: 488886377, guid: c171dd08b24a5044783a1d94ce7ed25b, type: 3}
+  uiSprite: {fileID: -986302676, guid: fd0c20cf555509a4bb25f1a1777b7cec, type: 3}
   texType: 1
   isTransparent: 0
+  isFoiliage: 0
+  targetTool: 2
+  baseMiningSpeed: 3
   lightLevel: 0
   isOre: 0
   oreVeinSize: 0

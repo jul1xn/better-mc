@@ -13,10 +13,12 @@ MonoBehaviour:
   m_Name: 02 - Grass Block
   m_EditorClassIdentifier: 
   blockName: Grass block
-  uiSprite: {fileID: 142704605, guid: c171dd08b24a5044783a1d94ce7ed25b, type: 3}
+  uiSprite: {fileID: 1532617083, guid: fd0c20cf555509a4bb25f1a1777b7cec, type: 3}
   texType: 0
   isTransparent: 0
   isFoiliage: 1
+  targetTool: 0
+  baseMiningSpeed: 1.3
   lightLevel: 0
   isOre: 0
   oreVeinSize: 0

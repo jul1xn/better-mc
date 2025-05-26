@@ -13,8 +13,10 @@ MonoBehaviour:
   m_Name: 06 - Crafting table
   m_EditorClassIdentifier: 
   blockName: Crafting Table
-  uiSprite: {fileID: -1511726029, guid: c171dd08b24a5044783a1d94ce7ed25b, type: 3}
+  uiSprite: {fileID: 242888511, guid: fd0c20cf555509a4bb25f1a1777b7cec, type: 3}
   texType: 2
+  isTransparent: 0
+  isFoiliage: 0
   lightLevel: 0
   isOre: 0
   oreVeinSize: 0
