@@ -23,9 +23,9 @@ MonoBehaviour:
   isOre: 0
   oreVeinSize: 0
   oreRarity: 0
-  frontMainTexture: 46
+  frontMainTexture: birch_log
   backTexture: 0
   leftTexture: 0
   rightTexture: 0
-  topTexture: 78
-  bottomTexture: 78
+  topTexture: birch_log_top
+  bottomTexture: birch_log_top

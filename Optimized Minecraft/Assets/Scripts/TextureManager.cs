@@ -1,15 +1,16 @@
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
 public class TextureManager : MonoBehaviour
 {
     public static TextureManager instance;
-
     public Dictionary<string, Vector2> textures = new Dictionary<string, Vector2>();
     public Texture2D textureAtlas;
     private int textureSize = 16;
+    private List<Texture2D> texs = new List<Texture2D>();
 
     private void Awake()
     {
@@ -19,6 +20,7 @@ public class TextureManager : MonoBehaviour
         }
         else
         {
+            Debug.LogWarning(gameObject.name);
             Destroy(gameObject);
             return;
         }
@@ -26,17 +28,22 @@ public class TextureManager : MonoBehaviour
         DontDestroyOnLoad(gameObject);
     }
 
-    private void GenerateTextureAtlasFromResources()
+    public void AddNewTexture(Texture2D tex)
     {
-        Texture2D[] loadedTextures = Resources.LoadAll<Texture2D>("Textures/Blocks");
+        texs.Add(tex);
+    }
 
-        if (loadedTextures.Length == 0)
+    public void GenerateTextureAtlasFromResources()
+    {
+        texs.AddRange(Resources.LoadAll<Texture2D>("Textures/Blocks"));
+
+        if (texs.Count == 0)
         {
             Debug.LogError("No textures found in Resources/Textures/Blocks");
             return;
         }
 
-        int count = loadedTextures.Length;
+        int count = texs.Count;
         int gridSize = Mathf.CeilToInt(Mathf.Sqrt(count));
         int atlasSize = gridSize * textureSize;
 
@@ -48,7 +55,7 @@ public class TextureManager : MonoBehaviour
             int x = (i % gridSize) * textureSize;
             int y = (i / gridSize) * textureSize;
 
-            Texture2D tex = loadedTextures[i];
+            Texture2D tex = texs[i];
 
             if (tex.width != textureSize || tex.height != textureSize)
             {
@@ -67,6 +74,8 @@ public class TextureManager : MonoBehaviour
         textureAtlas.Apply();
         textureAtlas.alphaIsTransparency = true;
         textureAtlas.filterMode = FilterMode.Point;
+
+        texs = new List<Texture2D>();
     }
 
     public Vector2 GetTextureUV(string textureName)
@@ -82,17 +91,34 @@ public class TextureManager : MonoBehaviour
 
     public void DumpAtlas()
     {
-        if (!Directory.Exists(Application.persistentDataPath + "debug/"))
+        if (textureAtlas == null)
         {
-            Directory.CreateDirectory(Application.persistentDataPath + "debug/");
+            Debug.LogError("Texture atlas not generated yet.");
+            return;
         }
+
+        string debugDir = Path.Combine(Application.persistentDataPath, "debug");
+
+        if (!Directory.Exists(debugDir))
+        {
+            Directory.CreateDirectory(debugDir);
+        }
+
+        string atlasPath = Path.Combine(debugDir, "atlas.png");
         byte[] pngData = textureAtlas.EncodeToPNG();
-        string path = Application.persistentDataPath + "debug/atlas.png";
-        File.WriteAllBytes(path, pngData);
-        
-        foreach(var kvp in textures)
+        File.WriteAllBytes(atlasPath, pngData);
+        Debug.Log("Saved atlas to " + atlasPath);
+
+        string indexPath = Path.Combine(debugDir, "atlas_index.txt");
+        using (StreamWriter sw = new StreamWriter(indexPath, false))
         {
-            File.AppendAllText(Application.persistentDataPath + "debug/atlas_index.txt", $"{kvp.Key}: {kvp.Value}");
+            foreach (var kvp in textures)
+            {
+                sw.WriteLine($"{kvp.Key}: {kvp.Value}");
+            }
         }
+
+        Debug.Log("Saved atlas index to " + indexPath);
     }
+
 }

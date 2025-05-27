@@ -17,13 +17,15 @@ MonoBehaviour:
   texType: 1
   isTransparent: 0
   isFoiliage: 0
+  targetTool: 0
+  baseMiningSpeed: 1
   lightLevel: 0
   isOre: 0
   oreVeinSize: 0
   oreRarity: 0
-  frontMainTexture: 773
+  frontMainTexture: sandstone
   backTexture: 0
   leftTexture: 0
   rightTexture: 0
-  topTexture: 775
-  bottomTexture: 774
+  topTexture: sandstone_top
+  bottomTexture: sandstone_bottom

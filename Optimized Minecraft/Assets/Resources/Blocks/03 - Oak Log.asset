@@ -23,9 +23,9 @@ MonoBehaviour:
   isOre: 0
   oreVeinSize: 0
   oreRarity: 0
-  frontMainTexture: 610
+  frontMainTexture: oak_log
   backTexture: 0
   leftTexture: 0
   rightTexture: 0
-  topTexture: 611
-  bottomTexture: 611
+  topTexture: oak_log_top
+  bottomTexture: oak_log_top

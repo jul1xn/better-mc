@@ -16,11 +16,14 @@ MonoBehaviour:
   uiSprite: {fileID: -2058351913, guid: c171dd08b24a5044783a1d94ce7ed25b, type: 3}
   texType: 0
   isTransparent: 1
+  isFoiliage: 0
+  targetTool: 0
+  baseMiningSpeed: 1
   lightLevel: 0
   isOre: 0
   oreVeinSize: 0
   oreRarity: 0
-  frontMainTexture: 102
+  frontMainTexture: water_flow
   backTexture: 0
   leftTexture: 0
   rightTexture: 0

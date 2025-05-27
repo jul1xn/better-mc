@@ -23,7 +23,7 @@ MonoBehaviour:
   isOre: 0
   oreVeinSize: 0
   oreRarity: 0
-  frontMainTexture: 269
+  frontMainTexture: birch_leaves
   backTexture: 0
   leftTexture: 0
   rightTexture: 0

@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using UnityEngine.UIElements;
+using System.Security.Cryptography;
 
 public class DataPackManager : MonoBehaviour
 {
@@ -35,8 +37,22 @@ public class DataPackManager : MonoBehaviour
                 return;
             }
 
+            string textures = dir + "\\textures\\";
             string biomes = dir + "\\biomes\\";
             string features = dir + "\\features\\";
+
+            if (Directory.Exists(textures))
+            {
+                foreach(var file in Directory.GetFiles(textures).Where(t => t.EndsWith(".png")))
+                {
+                    Texture2D tex = new Texture2D(1, 1, TextureFormat.RGBA32, false);
+                    byte[] bytes = File.ReadAllBytes(file);
+                    tex.LoadImage(bytes);
+                    tex.Apply();
+                    tex.name = Path.GetFileNameWithoutExtension(file);
+                    TextureManager.instance.AddNewTexture(tex);
+                }
+            }
 
             if (Directory.Exists(biomes))
             {
@@ -93,6 +109,8 @@ public class DataPackManager : MonoBehaviour
                 }
             }
         }
+
+        TextureManager.instance.GenerateTextureAtlasFromResources();
     }
 
     public DatapackData[] GetDatapacks()

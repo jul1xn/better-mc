@@ -17,13 +17,15 @@ MonoBehaviour:
   texType: 1
   isTransparent: 0
   isFoiliage: 0
+  targetTool: 0
+  baseMiningSpeed: 1
   lightLevel: 0
   isOre: 0
   oreVeinSize: 0
   oreRarity: 0
-  frontMainTexture: 363
+  frontMainTexture: cactus_side
   backTexture: 0
   leftTexture: 0
   rightTexture: 0
-  topTexture: 364
-  bottomTexture: 362
+  topTexture: cactus_top
+  bottomTexture: cactus_bottom

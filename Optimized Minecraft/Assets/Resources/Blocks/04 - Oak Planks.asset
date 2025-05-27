@@ -23,7 +23,7 @@ MonoBehaviour:
   isOre: 0
   oreVeinSize: 0
   oreRarity: 0
-  frontMainTexture: 612
+  frontMainTexture: oak_planks
   backTexture: 0
   leftTexture: 0
   rightTexture: 0

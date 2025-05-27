@@ -23,7 +23,7 @@ MonoBehaviour:
   isOre: 0
   oreVeinSize: 0
   oreRarity: 0
-  frontMainTexture: 313
+  frontMainTexture: grass_block_top
   backTexture: 0
   leftTexture: 0
   rightTexture: 0

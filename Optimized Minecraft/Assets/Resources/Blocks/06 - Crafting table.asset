@@ -17,13 +17,15 @@ MonoBehaviour:
   texType: 2
   isTransparent: 0
   isFoiliage: 0
+  targetTool: 0
+  baseMiningSpeed: 1
   lightLevel: 0
   isOre: 0
   oreVeinSize: 0
   oreRarity: 0
-  frontMainTexture: 176
-  backTexture: 176
-  leftTexture: 144
-  rightTexture: 144
-  topTexture: 208
-  bottomTexture: 612
+  frontMainTexture: crafting_table_front
+  backTexture: crafting_table_front
+  leftTexture: crafting_table_side
+  rightTexture: crafting_table_side
+  topTexture: crafting_table_top
+  bottomTexture: oak_planks
