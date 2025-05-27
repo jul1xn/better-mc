@@ -1,11 +1,13 @@
-using System.Collections;
 using System.Collections.Generic;
+using System.IO;
+using UnityEditor;
 using UnityEngine;
 
 public class TextureManager : MonoBehaviour
 {
     public static TextureManager instance;
-    public Dictionary<short, Vector2> textures = new Dictionary<short, Vector2>();
+
+    public Dictionary<string, Vector2> textures = new Dictionary<string, Vector2>();
     public Texture2D textureAtlas;
     private int textureSize = 16;
 
@@ -20,46 +22,77 @@ public class TextureManager : MonoBehaviour
             Destroy(gameObject);
             return;
         }
+
         DontDestroyOnLoad(gameObject);
-        GenerateTextureAtlas();
     }
 
-    private void GenerateTextureAtlas()
+    private void GenerateTextureAtlasFromResources()
     {
-        if (textureAtlas == null)
+        Texture2D[] loadedTextures = Resources.LoadAll<Texture2D>("Textures/Blocks");
+
+        if (loadedTextures.Length == 0)
         {
-            Debug.LogError("Texture Atlas is not assigned!");
+            Debug.LogError("No textures found in Resources/Textures/Blocks");
             return;
         }
 
-        short blockId = 0;
-        int columns = textureAtlas.width / textureSize;
-        int rows = (textureAtlas.height / textureSize) * 2;
+        int count = loadedTextures.Length;
+        int gridSize = Mathf.CeilToInt(Mathf.Sqrt(count));
+        int atlasSize = gridSize * textureSize;
 
-        for (int y = 0; y < rows; y++)
+        textureAtlas = new Texture2D(atlasSize, atlasSize);
+        textureAtlas.filterMode = FilterMode.Point; // For pixel art
+
+        for (int i = 0; i < count; i++)
         {
-            for (int x = 0; x < columns; x++)
+            int x = (i % gridSize) * textureSize;
+            int y = (i / gridSize) * textureSize;
+
+            Texture2D tex = loadedTextures[i];
+
+            if (tex.width != textureSize || tex.height != textureSize)
             {
-                float u = (float)x / columns;
-                float v = (float)(rows - y) / rows;
-
-
-                textures[blockId] = new Vector2(u, v);
-                blockId++;
+                Debug.LogWarning($"{tex.name} is not {textureSize}x{textureSize}, scaling may be incorrect.");
             }
+
+            Color[] pixels = tex.GetPixels(0, 0, textureSize, textureSize);
+            textureAtlas.SetPixels(x, y, textureSize, textureSize, pixels);
+
+            float u = (float)x / atlasSize;
+            float v = (float)y / atlasSize;
+
+            textures[tex.name] = new Vector2(u, v);
         }
+
+        textureAtlas.Apply();
+        textureAtlas.alphaIsTransparency = true;
+        textureAtlas.filterMode = FilterMode.Point;
     }
 
-    public Vector2 GetTextureUV(short blockId)
+    public Vector2 GetTextureUV(string textureName)
     {
-        if (textures.ContainsKey(blockId))
+        if (textures.TryGetValue(textureName, out Vector2 uv))
         {
-            return textures[blockId];
+            return uv;
         }
-        else
+
+        Debug.LogWarning($"Texture name '{textureName}' not found in the atlas!");
+        return Vector2.zero;
+    }
+
+    public void DumpAtlas()
+    {
+        if (!Directory.Exists(Application.persistentDataPath + "debug/"))
         {
-            Debug.LogWarning($"Block ID {blockId} not found in the texture atlas!");
-            return Vector2.zero;
+            Directory.CreateDirectory(Application.persistentDataPath + "debug/");
+        }
+        byte[] pngData = textureAtlas.EncodeToPNG();
+        string path = Application.persistentDataPath + "debug/atlas.png";
+        File.WriteAllBytes(path, pngData);
+        
+        foreach(var kvp in textures)
+        {
+            File.AppendAllText(Application.persistentDataPath + "debug/atlas_index.txt", $"{kvp.Key}: {kvp.Value}");
         }
     }
 }

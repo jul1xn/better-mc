@@ -112,7 +112,7 @@ public class BlocksManager : MonoBehaviour
     }
 
 
-    public static short GetTextureIndexForFace(Block block, string face)
+    public static string GetTextureIndexForFace(Block block, string face)
     {
         switch (block.texType)
         {

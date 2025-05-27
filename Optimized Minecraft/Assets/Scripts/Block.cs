@@ -22,22 +22,22 @@ public class Block : ScriptableObject
     [Space]
 
     [Tooltip("Used in: SingleTex, TopBottomAndSides, AllDifferent")]
-    public short frontMainTexture;
+    public string frontMainTexture;
 
     [Tooltip("Used in: AllDifferent")]
-    public short backTexture;
+    public string backTexture;
 
     [Tooltip("Used in: AllDifferent")]
-    public short leftTexture;
+    public string leftTexture;
 
     [Tooltip("Used in: AllDifferent")]
-    public short rightTexture;
+    public string rightTexture;
 
     [Tooltip("Used in: TopBottomAndSides, AllDifferent")]
-    public short topTexture;
+    public string topTexture;
 
     [Tooltip("Used in: TopBottomAndSides, AllDifferent")]
-    public short bottomTexture;
+    public string bottomTexture;
 }
 
 public enum TextureType { SingleTex, TopBottomAndSides, AllDifferent }

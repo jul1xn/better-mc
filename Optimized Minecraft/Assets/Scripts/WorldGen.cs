@@ -42,7 +42,7 @@ public class WorldGen : MonoBehaviour
     public Dictionary<Vector2, GameObject> loadedChunks = new Dictionary<Vector2, GameObject>();
     private Vector2 lastPlayerChunk;
     private int atlasWidth;
-    public Dictionary<short, Vector2> textureAtlas = new Dictionary<short, Vector2>();
+    public Dictionary<string, Vector2> textureAtlas = new Dictionary<string, Vector2>();
 
     public ConcurrentQueue<StagedChunk> stagedChunks = new ConcurrentQueue<StagedChunk>();
     public WorldType type;
@@ -77,6 +77,7 @@ public class WorldGen : MonoBehaviour
 
     private void Start()
     {
+        sharedMaterial.mainTexture = TextureManager.instance.textureAtlas;
         breakingMesh = breakingBlock.GetComponent<MeshRenderer>();
         modifiedBlockCopy = LevelController.instance.t_worldsave.modifiedChunks;
         seed = LevelController.instance.t_worldsave.seed;
@@ -123,7 +124,7 @@ public class WorldGen : MonoBehaviour
 
         foreach (var texture in TextureManager.instance.textures)
         {
-            int blockID = texture.Key;
+            string blockID = texture.Key;
             Vector2 uvBase = texture.Value;
 
             // Create a cube
@@ -461,7 +462,7 @@ public class WorldGen : MonoBehaviour
 
             if (shouldAddFace)
             {
-                short textureIndex = BlocksManager.GetTextureIndexForFace(block, face);
+                string textureIndex = BlocksManager.GetTextureIndexForFace(block, face);
                 Vector2 uvBase = textureAtlas[textureIndex];
 
                 System.Random r = new System.Random();

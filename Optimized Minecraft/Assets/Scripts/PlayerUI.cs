@@ -163,6 +163,14 @@ public class PlayerUI : MonoBehaviour
                 PlayerMovement.instance.ToggleFly();
             }
 
+            if (msgs[0] == "debug")
+            {
+                if (msgs[1] == "dumpatlas")
+                {
+                    TextureManager.instance.DumpAtlas();
+                }
+            }
+
             if (msgs[0] == "biome")
             {
                 Biome targetBiome = BlocksManager.Instance.GetBiomeByName(msgs[1]);
