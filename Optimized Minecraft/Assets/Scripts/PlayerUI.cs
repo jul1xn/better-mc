@@ -151,6 +151,11 @@ public class PlayerUI : MonoBehaviour
                 PlayerMovement.instance.TeleportToPosition(targetPos);
             }
 
+            if (msgs[0] == "summon")
+            {
+                EntityManager.instance.SpawnEntityAt(PlayerMovement.instance.transform.position, EntityType.Cow);
+            }
+
             if (msgs[0] == "debugmode")
             {
                 WorldGen.instance.debugDraw = !WorldGen.instance.debugDraw;
