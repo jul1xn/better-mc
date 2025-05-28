@@ -54,6 +54,8 @@ public class DataPackManager : MonoBehaviour
                     tex.name = Path.GetFileNameWithoutExtension(file);
                     TextureManager.instance.AddNewTexture(tex);
                 }
+
+                Log($"Loaded {Directory.GetFiles(textures).Where(t => t.EndsWith(".png")).Count()} textures");
             }
 
             if (Directory.Exists(blocks))
@@ -89,6 +91,7 @@ public class DataPackManager : MonoBehaviour
                     b.name = $"{BlocksManager.Instance.allBlocks.Count} - {b.blockName}";
 
                     BlocksManager.Instance.allBlocks.Add(b);
+                    Log("Registered block " + b.blockName);
                 }
             }
 
@@ -143,7 +146,7 @@ public class DataPackManager : MonoBehaviour
                     biome.spawnAbleFeatures = biomeFeatures.ToArray();
 
                     BlocksManager.Instance.allBiomes.Add(biome);
-                    Debug.Log("Registered biome " + biome.biomeName);
+                    Log("Registered biome " + biome.biomeName);
                 }
             }
         }
@@ -168,6 +171,11 @@ public class DataPackManager : MonoBehaviour
         }
 
         return dts.ToArray();
+    }
+
+    private void Log(object msg)
+    {
+        Debug.Log($"[DataPackManager] {msg.ToString()}");
     }
 }
 
