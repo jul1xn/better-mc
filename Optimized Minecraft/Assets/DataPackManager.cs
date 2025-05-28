@@ -6,6 +6,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using UnityEngine.UIElements;
 using System.Security.Cryptography;
+using System;
 
 public class DataPackManager : MonoBehaviour
 {
@@ -38,6 +39,7 @@ public class DataPackManager : MonoBehaviour
             }
 
             string textures = dir + "\\textures\\";
+            string blocks = dir + "\\blocks\\";
             string biomes = dir + "\\biomes\\";
             string features = dir + "\\features\\";
 
@@ -51,6 +53,42 @@ public class DataPackManager : MonoBehaviour
                     tex.Apply();
                     tex.name = Path.GetFileNameWithoutExtension(file);
                     TextureManager.instance.AddNewTexture(tex);
+                }
+            }
+
+            if (Directory.Exists(blocks))
+            {
+                foreach(var file in Directory.GetFiles(blocks).Where(p => p.EndsWith(".json")))
+                {
+                    Block b = ScriptableObject.CreateInstance<Block>();
+                    JObject blockData = JsonConvert.DeserializeObject<JObject>(File.ReadAllText(file));
+                    
+                    b.name = (string)blockData["name"];
+                    b.texType = (TextureType)Enum.Parse(typeof(TextureType), (string)blockData["textures"]["type"], true);
+                    
+                    b.isTransparent = (bool)blockData["properties"]["isTransparent"];
+                    b.isFoiliage = (bool)blockData["properties"]["isFoliage"];
+                    b.targetTool = (TargetTool)Enum.Parse(typeof(TargetTool), (string)blockData["properties"]["targetMiningTool"], true);
+                    b.baseMiningSpeed = (float)blockData["properties"]["baseMiningSpeed"];
+                    b.lightLevel = (byte)blockData["properties"]["lightLevel"];
+
+                    b.isOre = (bool)blockData["ore"]["enabled"];
+                    if (b.isOre)
+                    {
+                        b.oreVeinSize = (int)blockData["ore"]["veinSize"];
+                        b.oreRarity = (int)blockData["ore"]["oreRarity"];
+                    }
+
+                    b.frontMainTexture = (string)blockData["textures"]["front"];
+                    b.backTexture = (string)blockData["textures"]["back"];
+                    b.leftTexture = (string)blockData["textures"]["left"];
+                    b.rightTexture = (string)blockData["textures"]["right"];
+                    b.topTexture = (string)blockData["textures"]["top"];
+                    b.bottomTexture = (string)blockData["textures"]["bottom"];
+
+                    b.name = $"{BlocksManager.Instance.allBlocks.Count} - {b.blockName}";
+
+                    BlocksManager.Instance.allBlocks.Add(b);
                 }
             }
 
@@ -123,6 +161,7 @@ public class DataPackManager : MonoBehaviour
             data.folder_name = Path.GetFileName(dir);
             data.biomeCount = Directory.GetFiles(dir + "\\biomes\\").Where(p => p.EndsWith(".json")).Count();
             data.featureCount = Directory.GetFiles(dir + "\\features\\").Where(p => p.EndsWith(".json")).Count();
+            data.blockCount = Directory.GetFiles(dir + "\\blocks\\").Where(p => p.EndsWith(".json")).Count();
             data.enabled = disabledPacks.Contains(data.folder_name);
 
             dts.Add(data);
@@ -137,5 +176,6 @@ public struct DatapackData
     public string folder_name;
     public int biomeCount;
     public int featureCount;
+    public int blockCount;
     public bool enabled;
 }

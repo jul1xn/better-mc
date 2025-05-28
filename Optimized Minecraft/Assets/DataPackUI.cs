@@ -14,7 +14,7 @@ public class DataPackUI : MonoBehaviour
     {
         dp = data;
         packName.text = data.folder_name;
-        detail.text = $"Biomes: {data.biomeCount}\tFeatures: {data.featureCount}";
+        detail.text = $"Biomes: {data.biomeCount}\tFeatures: {data.featureCount}\tBlocks: {data.blockCount}";
         toggle.isOn = !data.enabled;
         toggle.onValueChanged.AddListener(_ => OnTogglePressed());
     }
