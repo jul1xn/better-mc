@@ -40,12 +40,15 @@ public class PlayerUI : MonoBehaviour
         sprites = BlocksManager.Instance.allBlocks.ToArray();
         for (int i = 0; i < sprites.Length; i++)
         {
-            Sprite tSprite = sprites[i].uiSprite;
             GameObject obj = Instantiate(uiPrefab, uiParent);
-            obj.GetComponent<Image>().sprite = tSprite;
+            RawImage img = obj.GetComponent<RawImage>();
+            img.material = WorldGen.instance.sharedMaterial;
+
+            float uvSize = 16f / TextureManager.instance.textureAtlas.width; // size in normalized units
+            Vector2 uvBase = TextureManager.instance.GetTextureUV(sprites[i].frontMainTexture); // Assuming a method to get this
+            img.uvRect = new Rect(uvBase.x, uvBase.y, uvSize, uvSize);
 
             int index = i;
-
             obj.GetComponent<Button>().onClick.AddListener(() =>
             {
                 PlayerMovement.instance.mouseLook.selectedCube = (short)index;

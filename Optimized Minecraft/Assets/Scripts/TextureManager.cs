@@ -11,6 +11,7 @@ public class TextureManager : MonoBehaviour
     public Texture2D textureAtlas;
     private int textureSize = 16;
     private List<Texture2D> texs = new List<Texture2D>();
+    private int atlasSize;
 
     private void Awake()
     {
@@ -45,7 +46,7 @@ public class TextureManager : MonoBehaviour
 
         int count = texs.Count;
         int gridSize = Mathf.CeilToInt(Mathf.Sqrt(count));
-        int atlasSize = gridSize * textureSize;
+        atlasSize = gridSize * textureSize;
 
         textureAtlas = new Texture2D(atlasSize, atlasSize);
         textureAtlas.filterMode = FilterMode.Point; // For pixel art
@@ -74,9 +75,11 @@ public class TextureManager : MonoBehaviour
         textureAtlas.Apply();
         textureAtlas.alphaIsTransparency = true;
         textureAtlas.filterMode = FilterMode.Point;
+        Debug.Log("Created texture atlas");
 
         texs = new List<Texture2D>();
     }
+
 
     public Vector2 GetTextureUV(string textureName)
     {

@@ -41,7 +41,7 @@ public class WorldGen : MonoBehaviour
 
     public Dictionary<Vector2, GameObject> loadedChunks = new Dictionary<Vector2, GameObject>();
     private Vector2 lastPlayerChunk;
-    private int atlasWidth;
+    public int atlasWidth;
     public Dictionary<string, Vector2> textureAtlas = new Dictionary<string, Vector2>();
 
     public ConcurrentQueue<StagedChunk> stagedChunks = new ConcurrentQueue<StagedChunk>();

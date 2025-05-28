@@ -5,7 +5,6 @@ using UnityEngine.UIElements;
 public class Block : ScriptableObject
 {
     public string blockName;
-    public Sprite uiSprite;
     public TextureType texType;
     public bool isTransparent;
     public bool isFoiliage;

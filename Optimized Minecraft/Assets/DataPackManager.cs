@@ -35,7 +35,7 @@ public class DataPackManager : MonoBehaviour
         {
             if (disabledPacks.Contains(Path.GetFileName(dir)))
             {
-                return;
+                continue;
             }
 
             string textures = dir + "\\textures\\";
